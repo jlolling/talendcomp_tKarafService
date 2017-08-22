@@ -5,6 +5,7 @@ import javax.management.openmbean.CompositeData;
 public class ServiceFeature {
 	
 	private String featureName;
+	private String artifactId = null;
 	private String version;
 	private boolean isInstalled = false;
 	private String bundles = null;
@@ -14,6 +15,12 @@ public class ServiceFeature {
 	public static ServiceFeature from(CompositeData cd) {
 		ServiceFeature f = new ServiceFeature();
 		f.featureName = (String) cd.get("Name");
+		int pos = f.featureName.indexOf("-feature");
+		if (pos > 0) {
+			f.artifactId = f.featureName.substring(0, pos); 
+		} else {
+			f.artifactId = f.featureName; 
+		}
 		f.version = (String) cd.get("Version");
 		f.isInstalled = (Boolean) cd.get("Installed");
 		f.bundles = getStringArrayAsString((String[]) cd.get("Bundles"));
@@ -62,6 +69,10 @@ public class ServiceFeature {
 		sb.append("\nbundles=");
 		sb.append(bundles);
 		return sb.toString();
+	}
+
+	public String getArtifactId() {
+		return artifactId;
 	}
 
 }

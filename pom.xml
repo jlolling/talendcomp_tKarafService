@@ -4,7 +4,6 @@
 
   <groupId>de.jlo.karaf.jmx</groupId>
   <artifactId>jlo-karaf-jmx</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>jlo-karaf-jmx</name>
@@ -22,4 +21,5 @@
 		    <scope>test</scope>
 		</dependency>
   </dependencies>
+  <version>1.0</version>
 </project>
