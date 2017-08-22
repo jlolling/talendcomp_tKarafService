@@ -1,4 +1,4 @@
-package de.jlo.karaf.jmx;
+package de.jlo.talendcomp.karaf.jmx;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,6 +60,19 @@ public class KarafDeployer {
 		}
 	}
 	
+	public void uninstallTalendService(String artifactId) throws Exception {
+		logger.info("Uninstall Talend Service: artifactId=" + artifactId);
+		String featureName = artifactId + "-feature";
+		logger.info("Uninstall features...");
+		uninstallFeature(featureName);
+		logger.info("Done");
+		logger.info("Check feature list...");
+		List<ServiceFeature> list = fetchFeatures(featureName, true);
+		if (list.isEmpty() == false) {
+			throw new Exception("Uninstallation seems to be ok but we still find the feature in the list of the installed feature!");
+		}
+	}
+
 	public void installFeature(String featureName, String version) throws Exception {
 		String[] opParams = {
 				featureName,

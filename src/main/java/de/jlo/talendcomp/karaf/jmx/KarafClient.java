@@ -1,4 +1,4 @@
-package de.jlo.karaf.jmx;
+package de.jlo.talendcomp.karaf.jmx;
 
 public class KarafClient extends BaseClient {
 

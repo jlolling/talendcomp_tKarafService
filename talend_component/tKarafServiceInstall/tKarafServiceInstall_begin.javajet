@@ -1,0 +1,43 @@
+<%@ jet 
+	imports="
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.core.model.utils.NodeUtil
+		java.util.List
+    	java.util.Map
+	" 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode) codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+	boolean isKaraf = "true".equals(ElementParameterParser.getValue(node, "__IS_KARAF__"));
+	String jmxUrl = ElementParameterParser.getValue(node, "__JMX_URL__");
+	String jmxUser = ElementParameterParser.getValue(node, "__JMX_USER__");
+	String jmxPassword = ElementParameterParser.getValue(node, "__JMX_PASSWORD__");
+	String server = ElementParameterParser.getValue(node, "__KARAF_SERVER__");
+	String instance = ElementParameterParser.getValue(node, "__KARAF_INSTANCE__");
+	String jmxPort = ElementParameterParser.getValue(node, "__JMX_PORT__");
+	String jstatdPort = ElementParameterParser.getValue(node, "__JSTATD_PORT__");
+%>
+	de.jlo.talendcomp.karaf.jmx.KarafClient client_<%=cid%> = new de.jlo.talendcomp.karaf.jmx.KarafClient();
+	client_<%=cid%>.setJmxUser(<%=jmxUser%>);
+	client_<%=cid%>.setJmxPassword(<%=jmxPassword%>);
+<%	if (isKaraf) { %>
+	client_<%=cid%>.setKarafRemoteJmxUrl(<%=server%>, <%=jmxPort%>, <%=instance%>, <%=jstatdPort%>);
+<%	} else { %>
+	client_<%=cid%>.setJmxUrl(<%=jmxUrl%>);
+<%	} %>
+	try {
+		client_<%=cid%>.connect();
+	} catch (Exception e) {
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", "Connect to jmx failed: " + e.getMessage());
+		throw new Exception("Connect to jmx failed: URL: " + client_<%=cid%>.getJmxServiceUrl(), e);
+	}
+	de.jlo.talendcomp.karaf.jmx.KarafDeployer <%=cid%> = new de.jlo.talendcomp.karaf.jmx.KarafDeployer(client_<%=cid%>);
+	int countInstall_<%=cid%> = 0;
+	int countUninstall_<%=cid%> = 0;
+	int countFailures_<%=cid%> = 0;

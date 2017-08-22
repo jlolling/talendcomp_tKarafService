@@ -1,4 +1,4 @@
-package de.jlo.karaf.jmx;
+package de.jlo.talendcomp.karaf.jmx;
 
 import java.io.IOException;
 import java.lang.management.MemoryUsage;
@@ -30,7 +30,8 @@ public class BaseClient {
 	private String jmxUser = null;
 	private String jmxPassword = null;
 	private MBeanServerConnection mBeanServerConnection = null;
-
+	private JMXConnector jmxConnector = null;
+	
 	public String getJmxServiceUrl() {
 		return jmxServiceUrl;
 	}
@@ -77,8 +78,18 @@ public class BaseClient {
 		mBeanServerConnection = null;
         Map<String, String[]> environment = new HashMap<String, String[]>();
         environment.put(JMXConnector.CREDENTIALS, new String[] { jmxUser, jmxPassword });
-        JMXConnector jmxConnector = connectWithTimeout(new JMXServiceURL(jmxServiceUrl), environment, 10000l);
+        jmxConnector = connectWithTimeout(new JMXServiceURL(jmxServiceUrl), environment, 10000l);
         mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+	}
+	
+	public void close() {
+		if (jmxConnector != null) {
+			try {
+				jmxConnector.close();
+			} catch (IOException e) {
+				// ignore
+			}
+		}
 	}
 	
 	private void checkConnection() throws Exception {
@@ -116,6 +127,7 @@ public class BaseClient {
 		final BlockingQueue<Object> mailbox = new ArrayBlockingQueue<Object>(1); 
 		ExecutorService executor = Executors.newSingleThreadExecutor(); 
 		executor.submit(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					JMXConnector connector = JMXConnectorFactory.connect(url, environment);

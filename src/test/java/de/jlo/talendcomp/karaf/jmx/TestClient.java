@@ -1,4 +1,4 @@
-package de.jlo.karaf.jmx;
+package de.jlo.talendcomp.karaf.jmx;
 
 import static org.junit.Assert.assertTrue;
 
@@ -6,6 +6,10 @@ import java.lang.management.MemoryUsage;
 import java.util.List;
 
 import org.junit.Test;
+
+import de.jlo.talendcomp.karaf.jmx.KarafClient;
+import de.jlo.talendcomp.karaf.jmx.KarafDeployer;
+import de.jlo.talendcomp.karaf.jmx.ServiceFeature;
 
 public class TestClient {
 
@@ -51,7 +55,7 @@ public class TestClient {
 	}
 
 	@Test
-	public void testInstallFeature() throws Exception {
+	public void testUnAndInstallFeature() throws Exception {
 		String host = "talendjobtest01.gvl.local";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
@@ -66,21 +70,16 @@ public class TestClient {
 		assertTrue(true);
 		// check memory usage
 		KarafDeployer d = new KarafDeployer(c);
-		System.out.println("List initial features...");
-		List<ServiceFeature> list = d.fetchFeatures("_service_", true);
-		for (ServiceFeature f : list) {
-			System.out.println(f + "\n");
-		}
-		System.out.println("Add repo...");
-		d.addFeatureRepo("de.gvl","navi_service_uploaded_files-feature", "26.17.0");
 		System.out.println("Uninstall feature...");
 		d.uninstallFeature("navi_service_uploaded_files-feature");
+		System.out.println("Add repo...");
+		d.addFeatureRepo("de.gvl","navi_service_uploaded_files-feature", "26.17.0");
 		System.out.println("Install feature...");
 		d.installFeature("navi_service_uploaded_files-feature", "26.17.0");
 		System.out.println("List resulting features...");
-		list = d.fetchFeatures("_service_", true);
+		List<ServiceFeature> list = d.fetchFeatures("_service_", true);
 		for (ServiceFeature f : list) {
-			System.out.println(f + "\n");
+			System.out.println(f.getArtifactId() + "\t" + f.getVersion() + "\t : " + f.getBundles());
 		}
 	}
 
@@ -100,6 +99,7 @@ public class TestClient {
 		assertTrue(true);
 		// check memory usage
 		KarafDeployer d = new KarafDeployer(c);
+		d.uninstallTalendService("navi_service_uploaded_files");
 		d.installTalendService("de.gvl","navi_service_uploaded_files", "26.17.0");
 	}
 

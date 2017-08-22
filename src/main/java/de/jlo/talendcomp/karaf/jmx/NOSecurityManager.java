@@ -1,4 +1,4 @@
-package de.jlo.karaf.jmx;
+package de.jlo.talendcomp.karaf.jmx;
 
 import java.security.Permission;
 

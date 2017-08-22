@@ -1,0 +1,45 @@
+<%@ jet 
+	imports="
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.core.model.utils.NodeUtil
+		java.util.List
+	" 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode) codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+	String connName = null;
+	List<? extends IConnection> conns = NodeUtil.getIncomingConnections(node, IConnectionCategory.DATA);
+	if (conns != null && conns.isEmpty() == false) {
+	    IConnection conn = conns.get(0);
+	    connName = conn.getName();
+	}
+	boolean dieOnError = "true".equals(ElementParameterParser.getValue(node, "__DIE_ON_ERROR__"));
+%>
+<%	if (connName != null) { %>
+	try {
+		if (<%=connName%>.uninstall) {
+			<%=cid%>.uninstallTalendService(<%=connName%>.artifact_id);
+			countUninstall_<%=cid%>++;
+		} else {
+			<%=cid%>.installTalendService(<%=connName%>.group_id, <%=connName%>.artifact_id, <%=connName%>.version);
+			countInstall_<%=cid%>++;
+		}
+		<%=connName%>.sucessful = true;
+	} catch (Exception e) {
+		String message = "Failed to install/uninstall: " + e.getMessage();
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
+		<%=connName%>.sucessful = false;
+		countFailures_<%=cid%>++;
+<%	if (dieOnError) { %>
+		throw new Exception(message, e);
+<%	} else { %>
+		e.printStackTrace();
+<%	} %>
+	}
+<%	} %>

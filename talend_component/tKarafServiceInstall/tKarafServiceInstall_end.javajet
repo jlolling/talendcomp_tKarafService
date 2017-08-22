@@ -1,0 +1,14 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+	" 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode) codeGenArgument.getArgument();
+    String cid = node.getUniqueName(); %>
+	client_<%=cid%>.close();
+	globalMap.put("<%=cid%>_NB_LINE_INSTALL", countInstall_<%=cid%>);
+	globalMap.put("<%=cid%>_NB_LINE_UNINSTALL", countUninstall_<%=cid%>);
+	globalMap.put("<%=cid%>_NB_LINE_FAILURES", countFailures_<%=cid%>);
