@@ -4,14 +4,25 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.management.MemoryUsage;
 import java.util.List;
+import java.util.Set;
 
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.junit.Before;
 import org.junit.Test;
 
-import de.jlo.talendcomp.karaf.jmx.KarafClient;
-import de.jlo.talendcomp.karaf.jmx.KarafDeployer;
-import de.jlo.talendcomp.karaf.jmx.ServiceFeature;
-
 public class TestClient {
+	
+	@Before
+	public void setup() {
+		BasicConfigurator.configure();
+		Logger root = Logger.getRootLogger();
+		root.setLevel(Level.DEBUG);
+	}
 
 	@Test
 	public void testConnect() throws Exception {
@@ -103,24 +114,48 @@ public class TestClient {
 		d.installTalendService("de.gvl","navi_service_uploaded_files", "26.17.0");
 	}
 
-//	@Test
-//	public void testQueryObjectNames() throws Exception {
-//		String host = "talendjobtest01.gvl.local";
-//		int jmxPort = 44444;
-//		int jstatdPort = 1099;
-//		String karafInstance = "trun";
-//		String user = "karaf";
-//		String passwd = "karaf";
-//		KarafClient c = new KarafClient();
-//		c.setJmxUser(user);
-//		c.setJmxPassword(passwd);
-//		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
-//		c.connect();
-//		Set<ObjectInstance> result = c.getmBeanServerConnection().queryMBeans(null /*new ObjectName("org.apache.cxf.bus.id=*")*/, null);
-//		for (ObjectInstance n : result) {
-//			System.out.println(n.toString());
-//		}
-//		
-//	}
+	@Test
+	public void testQueryObjectNames() throws Exception {
+		String host = "talendjobtest01.gvl.local";
+		int jmxPort = 44444;
+		int jstatdPort = 1099;
+		String karafInstance = "trun";
+		String user = "karaf";
+		String passwd = "karaf";
+		KarafClient c = new KarafClient();
+		c.setJmxUser(user);
+		c.setJmxPassword(passwd);
+		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
+		c.connect();
+		ObjectName pattern = new ObjectName("org.apache.cxf:type=Metrics.Server,*");
+		System.out.println(pattern.isPropertyListPattern());
+		Set<ObjectInstance> result = c.getmBeanServerConnection().queryMBeans(pattern /*new ObjectName("org.apache.cxf.bus.id=*")*/, null);
+		for (ObjectInstance n : result) {
+			if ("com.codahale.metrics.JmxReporter$JmxTimer".equals(n.getClassName())) {
+				System.out.println(n.getClassName());
+				System.out.println(n.getObjectName().getKeyProperty("bus.id"));
+				System.out.println();
+			}
+		}
+		assertTrue(true);
+	}
 	
+	@Test
+	public void testSetupCXFMetricObjectNames() throws Exception {
+		String host = "talendjobtest01.gvl.local";
+		int jmxPort = 44444;
+		int jstatdPort = 1099;
+		String karafInstance = "trun";
+		String user = "karaf";
+		String passwd = "karaf";
+		KarafClient c = new KarafClient();
+		c.setJmxUser(user);
+		c.setJmxPassword(passwd);
+		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
+		c.connect();
+		CXFMetricsCollector coll = new CXFMetricsCollector(c);
+		coll.setupCXFMetricObjectNames("core_api|beat17");
+		assertTrue(true);
+	}
+
 }

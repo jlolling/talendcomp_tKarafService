@@ -13,7 +13,7 @@ import javax.management.openmbean.CompositeData;
 public class KarafDeployer {
 	
 	private KarafClient jmxClient = null;
-	private static Logger logger = Logger.getLogger("de.jlo.karaf.jmx.KarafDeployer");
+	private static Logger logger = Logger.getLogger(KarafDeployer.class.getName());
 	
 	public KarafDeployer(KarafClient jmxClient) {
 		if (jmxClient == null) {
@@ -56,7 +56,7 @@ public class KarafDeployer {
 		logger.info("Check feature list...");
 		List<ServiceFeature> list = fetchFeatures(featureName, true);
 		if (list.isEmpty()) {
-			throw new Exception("Installation seems to be ok but we cannot find the feature in the list of the installed feature!");
+			throw new Exception("Installation seems to be ok but we cannot find the feature in the list of the installed features!");
 		}
 	}
 	
@@ -69,7 +69,7 @@ public class KarafDeployer {
 		logger.info("Check feature list...");
 		List<ServiceFeature> list = fetchFeatures(featureName, true);
 		if (list.isEmpty() == false) {
-			throw new Exception("Uninstallation seems to be ok but we still find the feature in the list of the installed feature!");
+			throw new Exception("Uninstallation seems to be ok but we still find the feature in the list of the installed features!");
 		}
 	}
 

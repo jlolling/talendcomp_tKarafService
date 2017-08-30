@@ -20,17 +20,21 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.apache.log4j.Logger;
+
 /**
  * JMX client
  * @author jan.lolling@gmail.com
  */
 public class BaseClient {
 
+	private static Logger logger = Logger.getLogger(BaseClient.class);
 	private String jmxServiceUrl = null;
 	private String jmxUser = null;
 	private String jmxPassword = null;
 	private MBeanServerConnection mBeanServerConnection = null;
 	private JMXConnector jmxConnector = null;
+	private long timeout = 1000l;
 	
 	public String getJmxServiceUrl() {
 		return jmxServiceUrl;
@@ -74,11 +78,12 @@ public class BaseClient {
 	}
 	
 	public void connect() throws Exception {
-		System.setProperty("sun.rmi.transport.connectionTimeout", "10000");
+		logger.debug("Connect to " + jmxServiceUrl + "...");
+		System.setProperty("sun.rmi.transport.connectionTimeout", String.valueOf(timeout));
 		mBeanServerConnection = null;
         Map<String, String[]> environment = new HashMap<String, String[]>();
         environment.put(JMXConnector.CREDENTIALS, new String[] { jmxUser, jmxPassword });
-        jmxConnector = connectWithTimeout(new JMXServiceURL(jmxServiceUrl), environment, 10000l);
+        jmxConnector = connectWithTimeout(new JMXServiceURL(jmxServiceUrl), environment, timeout);
         mBeanServerConnection = jmxConnector.getMBeanServerConnection();
 	}
 	
@@ -170,6 +175,14 @@ public class BaseClient {
 			// In principle this can't happen but we wrap it anyway 
 			throw new IOException(e.toString(), e); 
 		}
+	}
+
+	public long getTimeout() {
+		return timeout;
+	}
+
+	public void setTimeout(long timeout) {
+		this.timeout = timeout;
 	}
 
 }
