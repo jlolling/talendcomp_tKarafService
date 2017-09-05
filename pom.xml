@@ -61,6 +61,15 @@
 							<goal>component</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>tKarafServiceMetricInput</id>
+						<configuration>
+							<componentName>tKarafServiceMetricInput</componentName>
+						</configuration>
+						<goals>
+							<goal>component</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>

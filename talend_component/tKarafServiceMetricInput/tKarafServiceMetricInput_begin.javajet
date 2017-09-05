@@ -1,0 +1,83 @@
+<%@ jet 
+	imports="
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+		org.talend.core.model.process.INode 
+		org.talend.core.model.process.ElementParameterParser 
+		org.talend.core.model.process.IConnection
+		org.talend.core.model.process.IConnectionCategory
+		org.talend.core.model.utils.NodeUtil
+		java.util.List
+    	java.util.Map
+	" 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode) codeGenArgument.getArgument();
+    String cid = node.getUniqueName();
+	String outgoingConnName = null;
+	List<? extends IConnection> outConns = NodeUtil.getOutgoingConnections(node, IConnectionCategory.DATA);
+	if (outConns != null && outConns.isEmpty() == false) {
+	    IConnection outConn = outConns.get(0);
+	    outgoingConnName = outConn.getName();
+	}
+	boolean isKaraf = "true".equals(ElementParameterParser.getValue(node, "__IS_KARAF__"));
+	String jmxUrl = ElementParameterParser.getValue(node, "__JMX_URL__");
+	String jmxUser = ElementParameterParser.getValue(node, "__JMX_USER__");
+	String jmxPassword = ElementParameterParser.getValue(node, "__JMX_PASSWORD__");
+	String server = ElementParameterParser.getValue(node, "__KARAF_SERVER__");
+	String instance = ElementParameterParser.getValue(node, "__KARAF_INSTANCE__");
+	String jmxPort = ElementParameterParser.getValue(node, "__JMX_PORT__");
+	String jstatdPort = ElementParameterParser.getValue(node, "__JSTATD_PORT__");
+	String filter = ElementParameterParser.getValue(node, "__FEATURE_FILTER_REGEX__");
+	if (filter == null || filter.trim().isEmpty()) {
+		filter = "null";
+	}
+	String interval = ElementParameterParser.getValue(node, "__TIME_INTERVAL__");
+%>
+	de.jlo.talendcomp.karaf.jmx.KarafClient client_<%=cid%> = new de.jlo.talendcomp.karaf.jmx.KarafClient();
+	client_<%=cid%>.setJmxUser(<%=jmxUser%>);
+	client_<%=cid%>.setJmxPassword(<%=jmxPassword%>);
+<%	if (isKaraf) { %>
+	client_<%=cid%>.setKarafRemoteJmxUrl(<%=server%>, <%=jmxPort%>, <%=instance%>, <%=jstatdPort%>);
+<%	} else { %>
+	client_<%=cid%>.setJmxUrl(<%=jmxUrl%>);
+<%	} %>
+	try {
+		client_<%=cid%>.connect();
+	} catch (Exception e) {
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", "Connect to jmx failed: " + e.getMessage());
+		throw new Exception("Connect to jmx failed: URL: " + client_<%=cid%>.getJmxServiceUrl(), e);
+	}
+	globalMap.put("client_<%=cid%>", client_<%=cid%>);
+	de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector <%=cid%> = new de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector(client_<%=cid%>);
+<%	if (interval != null && interval.trim().isEmpty() == false) { %>
+	<%=cid%>.setInterval(<%=interval%>);
+<%	} %>
+	java.util.List<de.jlo.talendcomp.karaf.jmx.ServiceMetric> list_<%=cid%> = new java.util.ArrayList<de.jlo.talendcomp.karaf.jmx.ServiceMetric>();
+	try {
+		<%=cid%>.setupCXFTotalsMetricObjectNames(<%=filter%>);
+	} catch (Exception e) {
+		globalMap.put("<%=cid%>_ERROR_MESSAGE", "Setup metric object names failed: " + e.getMessage());
+		throw new Exception("Setup metric object names failed: " + e.getMessage(), e);
+	}
+	while (<%=cid%>.next()) {
+		try {
+			list_<%=cid%> = <%=cid%>.fetchServiceMetrics();
+		} catch (Exception e) {
+			globalMap.put("<%=cid%>_ERROR_MESSAGE", "Fetch metrics failed: " + e.getMessage());
+			throw new Exception("Fetch metrics failed: " + e.getMessage(), e);
+		}
+		int count_<%=cid%> = 0;
+		for (de.jlo.talendcomp.karaf.jmx.ServiceMetric <%=cid%>_metric : list_<%=cid%>) {
+			globalMap.put("<%=cid%>_service_endpoint", <%=cid%>_metric.getServiceName());
+			globalMap.put("<%=cid%>_avg_duration", <%=cid%>_metric.getDurationMean());
+			globalMap.put("<%=cid%>_timestamp", <%=cid%>_metric.getTimestamp());
+			globalMap.put("<%=cid%>_count_abs", <%=cid%>_metric.getCount());
+			globalMap.put("<%=cid%>_count_diff", <%=cid%>_metric.getCountDiff());
+<%	if (outgoingConnName != null) { %>
+			<%=outgoingConnName%>.service_endpoint = <%=cid%>_metric.getServiceName();
+			<%=outgoingConnName%>.avg_duration = <%=cid%>_metric.getDurationMean();
+			<%=outgoingConnName%>.timestamp = <%=cid%>_metric.getTimestamp();
+			<%=outgoingConnName%>.count_abs = <%=cid%>_metric.getCount();
+			<%=outgoingConnName%>.count_diff = <%=cid%>_metric.getCountDiff();
+<%	} %>

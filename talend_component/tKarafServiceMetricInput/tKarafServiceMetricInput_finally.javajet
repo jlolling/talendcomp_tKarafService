@@ -1,0 +1,14 @@
+<%@ jet 
+	imports="
+		org.talend.core.model.process.INode 
+		org.talend.designer.codegen.config.CodeGeneratorArgument
+	" 
+%>
+<% 
+    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+    INode node = (INode) codeGenArgument.getArgument();
+    String cid = node.getUniqueName(); %>
+    de.jlo.talendcomp.karaf.jmx.KarafClient client_<%=cid%> = (de.jlo.talendcomp.karaf.jmx.KarafClient) globalMap.get("client_<%=cid%>");
+    if (client_<%=cid%> != null && client_<%=cid%>.isConnected()) {
+		client_<%=cid%>.close();
+    }

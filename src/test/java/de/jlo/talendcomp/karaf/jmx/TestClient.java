@@ -21,7 +21,7 @@ public class TestClient {
 	public void setup() {
 		BasicConfigurator.configure();
 		Logger root = Logger.getRootLogger();
-		root.setLevel(Level.DEBUG);
+		root.setLevel(Level.INFO);
 	}
 
 	@Test
@@ -130,11 +130,10 @@ public class TestClient {
 		ObjectName pattern = new ObjectName("org.apache.cxf:type=Metrics.Server,*");
 		System.out.println(pattern.isPropertyListPattern());
 		Set<ObjectInstance> result = c.getmBeanServerConnection().queryMBeans(pattern /*new ObjectName("org.apache.cxf.bus.id=*")*/, null);
-		for (ObjectInstance n : result) {
-			if ("com.codahale.metrics.JmxReporter$JmxTimer".equals(n.getClassName())) {
-				System.out.println(n.getClassName());
-				System.out.println(n.getObjectName().getKeyProperty("bus.id"));
-				System.out.println();
+		for (ObjectInstance oi : result) {
+			if ("com.codahale.metrics.JmxReporter$JmxTimer".equals(oi.getClassName())) {
+				ObjectName on = oi.getObjectName();
+				System.out.println(on.getKeyProperty("bus.id"));
 			}
 		}
 		assertTrue(true);
@@ -154,7 +153,30 @@ public class TestClient {
 		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
 		c.connect();
 		CXFMetricsCollector coll = new CXFMetricsCollector(c);
-		coll.setupCXFMetricObjectNames("core_api|beat17");
+		coll.setupCXFTotalsMetricObjectNames("core_api|beat17");
+		assertTrue(true);
+	}
+
+	@Test
+	public void testListServiceMetrics() throws Exception {
+		String host = "talendjobtest01.gvl.local";
+		int jmxPort = 44444;
+		int jstatdPort = 1099;
+		String karafInstance = "trun";
+		String user = "karaf";
+		String passwd = "karaf";
+		KarafClient c = new KarafClient();
+		c.setJmxUser(user);
+		c.setJmxPassword(passwd);
+		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
+		c.connect();
+		CXFMetricsCollector coll = new CXFMetricsCollector(c);
+		coll.setupCXFTotalsMetricObjectNames("core_api|beat17");
+		System.out.println("\n\n#########################");
+		List<ServiceMetric> metrics = coll.fetchServiceMetrics();
+		for (ServiceMetric m : metrics) {
+			System.out.println(m);
+		}
 		assertTrue(true);
 	}
 

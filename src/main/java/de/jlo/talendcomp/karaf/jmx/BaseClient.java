@@ -119,6 +119,18 @@ public class BaseClient {
 		return (Collection<CompositeData>) tabularData.values();
 	}
 
+	@SuppressWarnings("unchecked")
+	public Collection<CompositeData> getAttributeValues(ObjectName objectName, String attribute) throws Exception {
+		checkConnection();
+		TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(objectName, attribute);
+		return (Collection<CompositeData>) tabularData.values();
+	}
+
+	public Object getAttributeValue(ObjectName objectName, String attribute) throws Exception {
+		checkConnection();
+		return mBeanServerConnection.getAttribute(objectName, attribute);
+	}
+
 	public MemoryUsage getMemoryInfo() throws Exception {
 		checkConnection();
 		CompositeData cd = getAttributeValue("java.lang:type=Memory", "HeapMemoryUsage");
