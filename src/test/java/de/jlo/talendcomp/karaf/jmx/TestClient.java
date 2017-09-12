@@ -180,4 +180,26 @@ public class TestClient {
 		assertTrue(true);
 	}
 
+	@Test
+	public void testListSystemMetrics() throws Exception {
+		String host = "talendjob01.gvl.local";
+		int jmxPort = 44444;
+		int jstatdPort = 1099;
+		String karafInstance = "trun";
+		String user = "karaf";
+		String passwd = "karaf";
+		KarafClient c = new KarafClient();
+		c.setJmxUser(user);
+		c.setJmxPassword(passwd);
+		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
+		c.connect();
+		JVMMetricsCollector coll = new JVMMetricsCollector(c);
+		System.out.println("\n\n#########################");
+		for (int i = 0; i < 1000; i++) {
+			SystemMetrics metrics = coll.fetchSystemMetrics();
+			System.out.println(metrics);
+			Thread.sleep(1000);
+		}
+		assertTrue(true);
+	}
 }

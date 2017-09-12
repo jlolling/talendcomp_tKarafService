@@ -14,11 +14,17 @@
     CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
     INode node = (INode) codeGenArgument.getArgument();
     String cid = node.getUniqueName();
-	String outgoingConnName = null;
-	List<? extends IConnection> outConns = NodeUtil.getOutgoingConnections(node, IConnectionCategory.DATA);
-	if (outConns != null && outConns.isEmpty() == false) {
-	    IConnection outConn = outConns.get(0);
-	    outgoingConnName = outConn.getName();
+	String serviceMetricsConnName = null;
+	List<? extends IConnection> serviceMetricsConns = node.getOutgoingConnections("SERVICE_METRICS");
+	if (serviceMetricsConns != null && serviceMetricsConns.isEmpty() == false) {
+	    IConnection outConn = serviceMetricsConns.get(0);
+	    serviceMetricsConnName = outConn.getName();
+	}
+	String systemMetricsConnName = null;
+	List<? extends IConnection> systemMetricsConns = node.getOutgoingConnections("SYSTEM_METRICS");
+	if (systemMetricsConns != null && systemMetricsConns.isEmpty() == false) {
+	    IConnection outConn = systemMetricsConns.get(0);
+	    systemMetricsConnName = outConn.getName();
 	}
 	boolean isKaraf = "true".equals(ElementParameterParser.getValue(node, "__IS_KARAF__"));
 	String jmxUrl = ElementParameterParser.getValue(node, "__JMX_URL__");
@@ -50,6 +56,7 @@
 	}
 	globalMap.put("client_<%=cid%>", client_<%=cid%>);
 	de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector <%=cid%> = new de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector(client_<%=cid%>);
+	de.jlo.talendcomp.karaf.jmx.JVMMetricsCollector <%=cid%>_jvm = new de.jlo.talendcomp.karaf.jmx.JVMMetricsCollector(client_<%=cid%>);
 <%	if (interval != null && interval.trim().isEmpty() == false) { %>
 	<%=cid%>.setInterval(<%=interval%>);
 <%	} %>
@@ -61,23 +68,52 @@
 		throw new Exception("Setup metric object names failed: " + e.getMessage(), e);
 	}
 	while (<%=cid%>.next()) {
+		de.jlo.talendcomp.karaf.jmx.SystemMetrics <%=cid%>_systemMetrics = null;
 		try {
 			list_<%=cid%> = <%=cid%>.fetchServiceMetrics();
+			<%=cid%>_systemMetrics = <%=cid%>_jvm.fetchSystemMetrics();
 		} catch (Exception e) {
 			globalMap.put("<%=cid%>_ERROR_MESSAGE", "Fetch metrics failed: " + e.getMessage());
 			throw new Exception("Fetch metrics failed: " + e.getMessage(), e);
 		}
+		globalMap.put("<%=cid%>_process_cpu_load", <%=cid%>_systemMetrics.getProcessCpuLoad());
+		globalMap.put("<%=cid%>_system_cpu_load", <%=cid%>_systemMetrics.getSystemCpuLoad());
+		globalMap.put("<%=cid%>_heap_memory_used", <%=cid%>_systemMetrics.getHeapMemoryUsed());
+		globalMap.put("<%=cid%>_heap_memory_max", <%=cid%>_systemMetrics.getHeapMemoryMax());
+		globalMap.put("<%=cid%>_timestamp", <%=cid%>_systemMetrics.getTimestamp());
 		int count_<%=cid%> = 0;
-		for (de.jlo.talendcomp.karaf.jmx.ServiceMetric <%=cid%>_metric : list_<%=cid%>) {
-			globalMap.put("<%=cid%>_service_endpoint", <%=cid%>_metric.getServiceName());
-			globalMap.put("<%=cid%>_avg_duration", <%=cid%>_metric.getDurationMean());
-			globalMap.put("<%=cid%>_timestamp", <%=cid%>_metric.getTimestamp());
-			globalMap.put("<%=cid%>_count_abs", <%=cid%>_metric.getCount());
-			globalMap.put("<%=cid%>_count_diff", <%=cid%>_metric.getCountDiff());
-<%	if (outgoingConnName != null) { %>
-			<%=outgoingConnName%>.service_endpoint = <%=cid%>_metric.getServiceName();
-			<%=outgoingConnName%>.avg_duration = <%=cid%>_metric.getDurationMean();
-			<%=outgoingConnName%>.timestamp = <%=cid%>_metric.getTimestamp();
-			<%=outgoingConnName%>.count_abs = <%=cid%>_metric.getCount();
-			<%=outgoingConnName%>.count_diff = <%=cid%>_metric.getCountDiff();
+		globalMap.put("<%=cid%>_count_service_metrics", list_<%=cid%>.size());
+		boolean <%=cid%>_no_service = list_<%=cid%>.isEmpty();
+		int <%=cid%>_max_index = (<%=cid%>_no_service ? 1 : list_<%=cid%>.size());
+		for (int <%=cid%>_metric_index = 0; <%=cid%>_metric_index < <%=cid%>_max_index; <%=cid%>_metric_index++) {
+			if (<%=cid%>_no_service == false) {
+				de.jlo.talendcomp.karaf.jmx.ServiceMetric <%=cid%>_metric = list_<%=cid%>.get(<%=cid%>_metric_index);
+				globalMap.put("<%=cid%>_service_endpoint", <%=cid%>_metric.getServiceName());
+				globalMap.put("<%=cid%>_avg_duration", <%=cid%>_metric.getDurationMean());
+				globalMap.put("<%=cid%>_timestamp", <%=cid%>_metric.getTimestamp());
+				globalMap.put("<%=cid%>_count_abs", <%=cid%>_metric.getCount());
+				globalMap.put("<%=cid%>_count_diff", <%=cid%>_metric.getCountDiff());
+<%	if (serviceMetricsConnName != null) { %>
+				<%=serviceMetricsConnName%> = new <%=serviceMetricsConnName%>Struct();
+				<%=serviceMetricsConnName%>.service_endpoint = <%=cid%>_metric.getServiceName();
+				<%=serviceMetricsConnName%>.avg_duration = <%=cid%>_metric.getDurationMean();
+				<%=serviceMetricsConnName%>.timestamp = <%=cid%>_metric.getTimestamp();
+				<%=serviceMetricsConnName%>.count_abs = <%=cid%>_metric.getCount();
+				<%=serviceMetricsConnName%>.count_diff = <%=cid%>_metric.getCountDiff();
+				<%=serviceMetricsConnName%>.is_last_metric = (<%=cid%>_metric_index == <%=cid%>_max_index - 1);
+			} else {
+				<%=serviceMetricsConnName%> = null;
+<%	} %>
+			}
+<%	if (systemMetricsConnName != null) { %>
+			if (count_<%=cid%> == 0) {
+				<%=systemMetricsConnName%> = new <%=systemMetricsConnName%>Struct();
+				<%=systemMetricsConnName%>.process_cpu_load = <%=cid%>_systemMetrics.getProcessCpuLoad();
+				<%=systemMetricsConnName%>.system_cpu_load = <%=cid%>_systemMetrics.getSystemCpuLoad();
+				<%=systemMetricsConnName%>.heap_memory_used = <%=cid%>_systemMetrics.getHeapMemoryUsed();
+				<%=systemMetricsConnName%>.heap_memory_max = <%=cid%>_systemMetrics.getHeapMemoryMax();
+				<%=systemMetricsConnName%>.timestamp = <%=cid%>_systemMetrics.getTimestamp();
+			} else {
+				<%=systemMetricsConnName%> = null;
+			}			
 <%	} %>

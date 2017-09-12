@@ -120,7 +120,7 @@ public class BaseClient {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Collection<CompositeData> getAttributeValues(ObjectName objectName, String attribute) throws Exception {
+	public Collection<CompositeData> getAttributeCompositeValues(ObjectName objectName, String attribute) throws Exception {
 		checkConnection();
 		TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(objectName, attribute);
 		return (Collection<CompositeData>) tabularData.values();

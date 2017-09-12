@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <COMPONENT> 
-  <HEADER PLATEFORM="ALL" SERIAL="" VERSION="2.0" STATUS="PROD" COMPATIBILITY="ALL" AUTHOR="Jan Lolling" RELEASE_DATE="20170906" HAS_CONDITIONAL_OUTPUTS="true" STARTABLE="true"> 
+  <HEADER PLATEFORM="ALL" SERIAL="" VERSION="2.0" STATUS="PROD" COMPATIBILITY="ALL" AUTHOR="Jan Lolling" RELEASE_DATE="20170912" HAS_CONDITIONAL_OUTPUTS="true" STARTABLE="true"> 
     <SIGNATURE/> 
   </HEADER>  
   <FAMILIES> 
@@ -16,16 +16,27 @@
     <CONNECTOR CTYPE="SUBJOB_ERROR" MAX_INPUT="1" MAX_OUTPUT="1"/>  
     <CONNECTOR CTYPE="COMPONENT_OK"/>  
     <CONNECTOR CTYPE="COMPONENT_ERROR"/>  
-    <CONNECTOR NAME="SERVICE_METRICS" CTYPE="FLOW" MAX_INPUT="0" MAX_OUTPUT="1" LINE_STYLE="1"/> 
+    <CONNECTOR NAME="SERVICE_METRICS" CTYPE="FLOW" MAX_INPUT="0" MAX_OUTPUT="1" LINE_STYLE="1"/>  
+    <CONNECTOR NAME="SYSTEM_METRICS" CTYPE="FLOW" MAX_INPUT="0" MAX_OUTPUT="1" LINE_STYLE="1"/> 
   </CONNECTORS>  
   <PARAMETERS> 
     <PARAMETER NAME="SCHEMA_SERVICE_METRICS" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="10" CONTEXT="SERVICE_METRICS"> 
       <TABLE READONLY="true"> 
+        <COLUMN NAME="timestamp" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="32" NULLABLE="false" COMMENT="Timestamp Measurement"/>  
         <COLUMN NAME="service_endpoint" TYPE="id_String" READONLY="true" CUSTOM="true" LENGTH="128" NULLABLE="false" COMMENT="Service Endpoint Name"/>  
         <COLUMN NAME="avg_duration" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="Avg Duration in ms"/>  
-        <COLUMN NAME="timestamp" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="32" NULLABLE="false" COMMENT="Timestamp Measurement"/>  
         <COLUMN NAME="count_abs" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Count Requests absolute"/>  
-        <COLUMN NAME="count_diff" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Count Request since last Measurement"/> 
+        <COLUMN NAME="count_diff" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Count Request since last Measurement"/>  
+        <COLUMN NAME="is_last_metric" TYPE="id_Boolean" READONLY="true" CUSTOM="true" LENGTH="1" NULLABLE="false" COMMENT="true if this record is the last record of metrics for one measurement"/> 
+      </TABLE> 
+    </PARAMETER>  
+    <PARAMETER NAME="SCHEMA_SYSTEM_METRICS" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="10" CONTEXT="SYSTEM_METRICS"> 
+      <TABLE READONLY="true"> 
+        <COLUMN NAME="timestamp" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="32" NULLABLE="false" COMMENT="Timestamp Measurement"/>  
+        <COLUMN NAME="process_cpu_load" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="Process CPU Load"/>  
+        <COLUMN NAME="system_cpu_load" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="System CPU Load"/>  
+        <COLUMN NAME="heap_memory_used" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Used Heap Memory"/>  
+        <COLUMN NAME="heap_memory_max" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Max Heap Memory"/> 
       </TABLE> 
     </PARAMETER>  
     <PARAMETER FIELD="CHECK" NAME="IS_KARAF" NUM_ROW="20" REQUIRED="true" GROUP="CONNECTION"> 
@@ -58,8 +69,8 @@
     </PARAMETER> 
   </PARAMETERS>  
   <ADVANCED_PARAMETERS> 
-    <PARAMETER NAME="RELEASE_LABEL_20170906" FIELD="LABEL" COLOR="0;0;0" NUM_ROW="900">
-      <DEFAULT>Release: 2.0 build at: 20170906</DEFAULT>
+    <PARAMETER NAME="RELEASE_LABEL_20170912" FIELD="LABEL" COLOR="0;0;0" NUM_ROW="900">
+      <DEFAULT>Release: 2.0 build at: 20170912</DEFAULT>
     </PARAMETER>
   </ADVANCED_PARAMETERS>  
   <CODEGENERATION> 
@@ -73,6 +84,11 @@
     <RETURN AVAILABILITY="FLOW" NAME="avg_duration" TYPE="id_Double"/>  
     <RETURN AVAILABILITY="FLOW" NAME="timestamp" TYPE="id_Long"/>  
     <RETURN AVAILABILITY="FLOW" NAME="count_abs" TYPE="id_Long"/>  
-    <RETURN AVAILABILITY="FLOW" NAME="count_diff" TYPE="id_Long"/> 
+    <RETURN AVAILABILITY="FLOW" NAME="count_diff" TYPE="id_Long"/>  
+    <RETURN AVAILABILITY="FLOW" NAME="count_service_metrics" TYPE="id_Integer"/>  
+    <RETURN AVAILABILITY="FLOW" NAME="process_cpu_load" TYPE="id_Double"/>  
+    <RETURN AVAILABILITY="FLOW" NAME="system_cpu_load" TYPE="id_Double"/>  
+    <RETURN AVAILABILITY="FLOW" NAME="heap_memory_used" TYPE="id_Long"/>  
+    <RETURN AVAILABILITY="FLOW" NAME="heap_memory_max" TYPE="id_Long"/> 
   </RETURNS>
 </COMPONENT>

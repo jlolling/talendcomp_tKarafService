@@ -113,6 +113,9 @@ public class CXFMetricsCollector {
 	}
 	
 	public boolean next() {
+		if (Thread.currentThread().isInterrupted()) {
+			return false;
+		}
 		long now = System.currentTimeMillis();
 		long diff = interval - (now - lastExecutionTime);
 		if (diff > 0) {
