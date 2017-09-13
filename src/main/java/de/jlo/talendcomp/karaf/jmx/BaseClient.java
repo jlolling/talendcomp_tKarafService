@@ -35,6 +35,7 @@ public class BaseClient {
 	private MBeanServerConnection mBeanServerConnection = null;
 	private JMXConnector jmxConnector = null;
 	private long timeout = 1000l;
+	private int maxRetryAttempts = 5; 
 	
 	public String getJmxServiceUrl() {
 		return jmxServiceUrl;
@@ -83,7 +84,21 @@ public class BaseClient {
 		mBeanServerConnection = null;
         Map<String, String[]> environment = new HashMap<String, String[]>();
         environment.put(JMXConnector.CREDENTIALS, new String[] { jmxUser, jmxPassword });
-        jmxConnector = connectWithTimeout(new JMXServiceURL(jmxServiceUrl), environment, timeout);
+        int currAttempts = 0;
+        while (true) {
+        	try {
+        		currAttempts++;
+        		jmxConnector = connectWithTimeout(new JMXServiceURL(jmxServiceUrl), environment, timeout);
+        		break;
+        	} catch (Exception e) {
+        		if (currAttempts == maxRetryAttempts) {
+        			throw e;
+        		} else {
+        			logger.warn("Connect failed: " + e.getMessage() + ". Start retry.");
+        			Thread.sleep(1000);
+        		}
+        	}
+        }
         mBeanServerConnection = jmxConnector.getMBeanServerConnection();
 	}
 	
