@@ -21,7 +21,7 @@ public class TestCollectMetrics {
 	public void setup() {
 		BasicConfigurator.configure();
 		Logger root = Logger.getRootLogger();
-		root.setLevel(Level.INFO);
+		root.setLevel(Level.DEBUG);
 	}
 
 	@Test
@@ -100,8 +100,10 @@ public class TestCollectMetrics {
 		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
 		c.connect();
 		CXFMetricsCollector coll = new CXFMetricsCollector(c);
+		coll.setInterval(5);
 		coll.setupCXFTotalsMetricObjectNames("core_api|beat17");
 		System.out.println("\n\n#########################");
+		int count = 0;
 		while (coll.next()) {
 			List<ServiceMetric> metrics = coll.fetchServiceMetrics();
 			for (ServiceMetric m : metrics) {
@@ -109,6 +111,9 @@ public class TestCollectMetrics {
 			}
 			System.out.println(System.currentTimeMillis() / 1000);
 			System.out.println();
+			if (++count == 4) {
+				break;
+			}
 		}
 		assertTrue(true);
 	}

@@ -117,8 +117,11 @@ public class CXFMetricsCollector {
 			return false;
 		}
 		long now = System.currentTimeMillis();
-		long diff = interval - (now - lastExecutionTime);
+		long diff = interval - (now - lastExecutionTime) - 50;
 		if (diff > 0) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Wait " + diff + "ms");
+			}
 			try {
 				Thread.sleep(diff);
 			} catch (InterruptedException e) {
