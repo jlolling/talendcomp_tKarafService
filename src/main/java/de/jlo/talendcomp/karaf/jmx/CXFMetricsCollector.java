@@ -118,7 +118,7 @@ public class CXFMetricsCollector {
 		}
 		long now = System.currentTimeMillis();
 		long diff = interval - (now - lastExecutionTime);
-		if (diff > 0) {
+		if (diff > 0 && lastExecutionTime > 0l) {
 			try {
 				Thread.sleep(diff);
 			} catch (InterruptedException e) {
