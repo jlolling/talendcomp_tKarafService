@@ -3,6 +3,8 @@ package de.jlo.talendcomp.karaf.jmx;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.management.MemoryUsage;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -109,11 +111,11 @@ public class TestCollectMetrics {
 			for (ServiceMetric m : metrics) {
 				System.out.println(m);
 			}
-			System.out.println(System.currentTimeMillis() / 1000);
-			System.out.println();
-			if (++count == 4) {
+			if (++count == 100) {
 				break;
 			}
+			System.out.println(new SimpleDateFormat("HH:mm:ss").format(new Date()));
+			System.out.println("#########################");
 		}
 		assertTrue(true);
 	}

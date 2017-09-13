@@ -91,10 +91,10 @@ public class BaseClient {
         		jmxConnector = connectWithTimeout(new JMXServiceURL(jmxServiceUrl), environment, timeout);
         		break;
         	} catch (Exception e) {
-        		if (currAttempts == maxRetryAttempts) {
+        		if (currAttempts >= maxRetryAttempts) {
         			throw e;
         		} else {
-        			logger.warn("Connect failed: " + e.getMessage() + ". Start retry.");
+        			logger.warn("Connect failed: " + e.getMessage() + ". Start retry #" + currAttempts);
         			Thread.sleep(1000);
         		}
         	}
@@ -110,6 +110,7 @@ public class BaseClient {
 				// ignore
 			}
 		}
+		mBeanServerConnection = null;
 	}
 	
 	private void checkConnection() throws Exception {

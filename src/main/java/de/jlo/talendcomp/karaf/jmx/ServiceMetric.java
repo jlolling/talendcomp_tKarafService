@@ -28,7 +28,7 @@ public class ServiceMetric {
 	}
 	@Override
 	public String toString() {
-		return timestamp + "|" + serviceName + "| duration-mean:" + meanDuration + "| count:" + count;
+		return timestamp + "|" + serviceName + "| duration-mean:" + meanDuration + "| count:" + count + "| count-diff:" + getCountDiff();
 	}
 	public Long getCount() {
 		return count;

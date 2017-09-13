@@ -117,18 +117,15 @@ public class CXFMetricsCollector {
 			return false;
 		}
 		long now = System.currentTimeMillis();
-		long diff = interval - (now - lastExecutionTime) - 50;
+		long diff = interval - (now - lastExecutionTime);
 		if (diff > 0) {
-			if (logger.isDebugEnabled()) {
-				logger.debug("Wait " + diff + "ms");
-			}
 			try {
 				Thread.sleep(diff);
 			} catch (InterruptedException e) {
 				return false;
 			}
 		}
-		lastExecutionTime = now;
+		lastExecutionTime = System.currentTimeMillis();
 		return true;
 	}
 
