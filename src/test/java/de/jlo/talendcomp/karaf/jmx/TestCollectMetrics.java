@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TestClient {
+public class TestCollectMetrics {
 	
 	@Before
 	public void setup() {
@@ -41,77 +41,6 @@ public class TestClient {
 		// check memory usage
 		MemoryUsage meminfo = c.getMemoryInfo();
 		System.out.println("max=" + meminfo.getMax() + " used=" + meminfo.getUsed());
-	}
-
-	@Test
-	public void testListFeatures() throws Exception {
-		String host = "talendjobtest01.gvl.local";
-		int jmxPort = 44444;
-		int jstatdPort = 1099;
-		String karafInstance = "trun";
-		String user = "karaf";
-		String passwd = "karaf";
-		KarafClient c = new KarafClient();
-		c.setJmxUser(user);
-		c.setJmxPassword(passwd);
-		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
-		c.connect();
-		assertTrue(true);
-		// check memory usage
-		KarafDeployer d = new KarafDeployer(c);
-		List<ServiceFeature> list = d.fetchFeatures("_service_", true);
-		for (ServiceFeature f : list) {
-			System.out.println(f.getArtifactId() + " - " + f.getVersion() + "\n");
-		}
-	}
-
-	@Test
-	public void testUnAndInstallFeature() throws Exception {
-		String host = "talendjobtest01.gvl.local";
-		int jmxPort = 44444;
-		int jstatdPort = 1099;
-		String karafInstance = "trun";
-		String user = "karaf";
-		String passwd = "karaf";
-		KarafClient c = new KarafClient();
-		c.setJmxUser(user);
-		c.setJmxPassword(passwd);
-		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
-		c.connect();
-		assertTrue(true);
-		// check memory usage
-		KarafDeployer d = new KarafDeployer(c);
-		System.out.println("Uninstall feature...");
-		d.uninstallFeature("navi_service_uploaded_files-feature");
-		System.out.println("Add repo...");
-		d.addFeatureRepo("de.gvl","navi_service_uploaded_files-feature", "26.17.0");
-		System.out.println("Install feature...");
-		d.installFeature("navi_service_uploaded_files-feature", "26.17.0");
-		System.out.println("List resulting features...");
-		List<ServiceFeature> list = d.fetchFeatures("_service_", true);
-		for (ServiceFeature f : list) {
-			System.out.println(f.getArtifactId() + "\t" + f.getVersion() + "\t : " + f.getBundles());
-		}
-	}
-
-	@Test
-	public void testInstallTalendService() throws Exception {
-		String host = "talendjobtest01.gvl.local";
-		int jmxPort = 44444;
-		int jstatdPort = 1099;
-		String karafInstance = "trun";
-		String user = "karaf";
-		String passwd = "karaf";
-		KarafClient c = new KarafClient();
-		c.setJmxUser(user);
-		c.setJmxPassword(passwd);
-		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
-		c.connect();
-		assertTrue(true);
-		// check memory usage
-		KarafDeployer d = new KarafDeployer(c);
-		d.uninstallTalendService("navi_service_uploaded_files");
-		d.installTalendService("de.gvl","navi_service_uploaded_files", "26.17.0");
 	}
 
 	@Test
@@ -173,9 +102,13 @@ public class TestClient {
 		CXFMetricsCollector coll = new CXFMetricsCollector(c);
 		coll.setupCXFTotalsMetricObjectNames("core_api|beat17");
 		System.out.println("\n\n#########################");
-		List<ServiceMetric> metrics = coll.fetchServiceMetrics();
-		for (ServiceMetric m : metrics) {
-			System.out.println(m);
+		while (coll.next()) {
+			List<ServiceMetric> metrics = coll.fetchServiceMetrics();
+			for (ServiceMetric m : metrics) {
+				System.out.println(m);
+			}
+			System.out.println(System.currentTimeMillis() / 1000);
+			System.out.println();
 		}
 		assertTrue(true);
 	}

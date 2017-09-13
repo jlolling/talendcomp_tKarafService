@@ -12,6 +12,8 @@ public class JVMMetricsCollector {
 	private BaseClient baseClient = null;
 	private ObjectName onMemory = null;
 	private ObjectName onOperatingSystem = null;
+	private long lastExecutionTime = 0l;
+	private long interval = 1000l;
 
 	public JVMMetricsCollector(BaseClient baseClient) throws MalformedObjectNameException {
 		if (baseClient == null || baseClient.isConnected() == false) {
@@ -38,5 +40,30 @@ public class JVMMetricsCollector {
 			throw e;
 		}
 	}
-	
+
+	public boolean next() {
+		if (Thread.currentThread().isInterrupted()) {
+			return false;
+		}
+		long now = System.currentTimeMillis();
+		long diff = interval - (now - lastExecutionTime);
+		if (diff > 0) {
+			try {
+				Thread.sleep(diff);
+			} catch (InterruptedException e) {
+				return false;
+			}
+		}
+		lastExecutionTime = now;
+		return true;
+	}
+
+	public long getInterval() {
+		return interval;
+	}
+
+	public void setInterval(int interval) {
+		this.interval = interval * 1000l;
+	}
+
 }
