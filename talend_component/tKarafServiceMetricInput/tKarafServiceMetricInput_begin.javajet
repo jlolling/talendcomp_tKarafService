@@ -38,6 +38,7 @@
 	if (filter == null || filter.trim().isEmpty()) {
 		filter = "null";
 	}
+	boolean ignoreSummaryMetrics = "true".equals(ElementParameterParser.getValue(node, "__FEATURE_FILTER_IS_OPERATION__"));
 	String interval = ElementParameterParser.getValue(node, "__TIME_INTERVAL__");
 %>
 	de.jlo.talendcomp.karaf.jmx.KarafClient client_<%=cid%> = new de.jlo.talendcomp.karaf.jmx.KarafClient();
@@ -60,6 +61,7 @@
 <%	if (interval != null && interval.trim().isEmpty() == false) { %>
 	<%=cid%>.setInterval(<%=interval%>);
 <%	} %>
+    <%=cid%>.setIgnoreSummaryMetrics(<%=ignoreSummaryMetrics%>);
 	java.util.List<de.jlo.talendcomp.karaf.jmx.ServiceMetric> list_<%=cid%> = new java.util.ArrayList<de.jlo.talendcomp.karaf.jmx.ServiceMetric>();
 	try {
 		<%=cid%>.setupCXFTotalsMetricObjectNames(<%=filter%>);

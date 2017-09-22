@@ -19,6 +19,7 @@ public class CXFMetricsCollector {
 	private long lastExecutionTime = 0l;
 	private long interval = 1000l;
 	private List<ServiceMetric> lastListServiceMetrics = new ArrayList<ServiceMetric>();
+	private boolean ignoreSummaryMetrics = false;
 	
 	public CXFMetricsCollector(BaseClient baseClient) {
 		if (baseClient == null || baseClient.isConnected() == false) {
@@ -79,11 +80,15 @@ public class CXFMetricsCollector {
 		return artifactId;
 	}
 	
-	public ServiceMetric fetchServiceMetric(ObjectName objectName) throws Exception {
+	public ServiceMetric fetchServiceMetric(ObjectName objectName, String operation) throws Exception {
 		String name = getArtifactIdFromObjectName(objectName);
-		String op = objectName.getKeyProperty("Operation");
-		if (op != null && op.trim().isEmpty() == false) {
-			name = name + "." + op;
+		if (operation != null && operation.trim().isEmpty() == false) {
+			name = name + "." + operation;
+		} else {
+			String op = objectName.getKeyProperty("Operation");
+			if (op != null && op.trim().isEmpty() == false) {
+				name = name + "." + op;
+			}
 		}
 		ServiceMetric metric = new ServiceMetric();
 		metric.setServiceName(name);
@@ -106,7 +111,14 @@ public class CXFMetricsCollector {
 	public List<ServiceMetric> fetchServiceMetrics() throws Exception {
 		List<ServiceMetric> listServiceMetrics = new ArrayList<ServiceMetric>();
 		for (ObjectName on : listMetricObjectNames) {
-			listServiceMetrics.add(fetchServiceMetric(on));
+			if (ignoreSummaryMetrics) {
+				String op = on.getKeyProperty("Operation");
+				if (op != null && op.trim().isEmpty() == false) {
+					listServiceMetrics.add(fetchServiceMetric(on, op));
+				}
+			} else {
+				listServiceMetrics.add(fetchServiceMetric(on, null));
+			}
 		}
 		lastListServiceMetrics = listServiceMetrics;
 		return listServiceMetrics;
@@ -135,6 +147,14 @@ public class CXFMetricsCollector {
 
 	public void setInterval(int interval) {
 		this.interval = interval * 1000l;
+	}
+
+	public boolean isIgnoreSummaryMetrics() {
+		return ignoreSummaryMetrics;
+	}
+
+	public void setIgnoreSummaryMetrics(boolean ignoreSummaryMetrics) {
+		this.ignoreSummaryMetrics = ignoreSummaryMetrics;
 	}
 
 }
