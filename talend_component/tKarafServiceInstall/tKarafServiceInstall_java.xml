@@ -27,6 +27,15 @@
         <COLUMN NAME="uninstall" TYPE="id_Boolean" READONLY="true" CUSTOM="true" LENGTH="32" NULLABLE="false" COMMENT="false=install, true=uninstall"/>  
         <COLUMN NAME="sucessful" TYPE="id_Boolean" READONLY="true" CUSTOM="true" LENGTH="32" NULLABLE="false" COMMENT="true if sucessful"/> 
       </TABLE> 
+    </PARAMETER>
+    <PARAMETER FIELD="CHECK" NAME="CHECK_NEXUS" NUM_ROW="11" REQUIRED="true" GROUP="NEXUS"> 
+      <DEFAULT>false</DEFAULT> 
+    </PARAMETER>  
+    <PARAMETER FIELD="TEXT" NAME="NEXUS_FEATURE_URL_GET_TEMPLATE" NUM_ROW="12" SHOW_IF="CHECK_NEXUS == 'true'" GROUP="NEXUS"> 
+      <DEFAULT>"http://localhost:8081/nexus/content/repositories/{repository}/{groupId}/{artifactId}-feature/{version}/{artifactId}-feature-{version}.xml"</DEFAULT> 
+    </PARAMETER>  
+    <PARAMETER FIELD="CHECK" NAME="CHECK_ONLY_NEXUS" NUM_ROW="13" REQUIRED="true" GROUP="NEXUS"> 
+      <DEFAULT>false</DEFAULT> 
     </PARAMETER>  
     <PARAMETER FIELD="CHECK" NAME="IS_KARAF" NUM_ROW="20" REQUIRED="true" GROUP="CONNECTION"> 
       <DEFAULT>true</DEFAULT> 

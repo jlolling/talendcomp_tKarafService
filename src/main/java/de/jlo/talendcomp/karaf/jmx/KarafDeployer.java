@@ -14,6 +14,8 @@ public class KarafDeployer {
 	
 	private KarafClient jmxClient = null;
 	private static Logger logger = Logger.getLogger(KarafDeployer.class.getName());
+	private HttpClient httpClient = null;
+	private String nexusGetFeatureXmlTemplate = "http://localhost:8081/nexus/content/repositories/{repository}/{groupId}/{artifactId}-feature/{version}/{artifactId}-feature-{version}.xml";
 	
 	public KarafDeployer(KarafClient jmxClient) {
 		if (jmxClient == null) {
@@ -41,6 +43,27 @@ public class KarafDeployer {
 			}
 		}
 		return list;
+	}
+	
+	private HttpClient getHttpClient() throws Exception {
+		if (httpClient == null) {
+			httpClient = HttpClient.init(null, null, null);
+		}
+		return httpClient;
+	}
+	
+	public boolean checkArtifactInNexus(String groupId, String artifactId, String version) throws Exception {
+		if (nexusGetFeatureXmlTemplate == null) {
+			throw new IllegalStateException("Nexus feature get template url not set!");
+		}
+		String groupStr = groupId.replace('.', '/');
+		String url = nexusGetFeatureXmlTemplate.replace("{artifactId}", artifactId).replace("{version}", version).replace("{groupId}", groupStr);
+		HttpClient getter = getHttpClient();
+		getter.get(url);
+		if (getter.getStatusCode() == 200) {
+			return true;
+		}
+		return false;
 	}
 	
 	public void installTalendService(String groupId, String artifactId, String version) throws Exception {
@@ -126,6 +149,14 @@ public class KarafDeployer {
 			sb.append(array[i]);
 		}
 		return sb.toString();
+	}
+
+	public String getNexusGetFeatureXmlTemplate() {
+		return nexusGetFeatureXmlTemplate;
+	}
+
+	public void setNexusGetFeatureXmlTemplate(String nexusGetFeatureXmlTemplate) {
+		this.nexusGetFeatureXmlTemplate = nexusGetFeatureXmlTemplate;
 	}
 
 }
