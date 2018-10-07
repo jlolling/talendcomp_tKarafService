@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <COMPONENT> 
-  <HEADER PLATEFORM="ALL" SERIAL="" VERSION="2.1" STATUS="PROD" COMPATIBILITY="ALL" AUTHOR="Jan Lolling" RELEASE_DATE="20170922" HAS_CONDITIONAL_OUTPUTS="true" STARTABLE="true"> 
+  <HEADER PLATEFORM="ALL" SERIAL="" VERSION="3.1" STATUS="PROD" COMPATIBILITY="ALL" AUTHOR="Jan Lolling" RELEASE_DATE="20181005" HAS_CONDITIONAL_OUTPUTS="true" STARTABLE="true"> 
     <SIGNATURE/> 
   </HEADER>  
   <FAMILIES> 
@@ -24,6 +24,7 @@
       <TABLE READONLY="true"> 
         <COLUMN NAME="timestamp" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="32" NULLABLE="false" COMMENT="Timestamp Measurement"/>  
         <COLUMN NAME="service_endpoint" TYPE="id_String" READONLY="true" CUSTOM="true" LENGTH="128" NULLABLE="false" COMMENT="Service Endpoint Name"/>  
+        <COLUMN NAME="service_operation" TYPE="id_String" READONLY="true" CUSTOM="true" LENGTH="128" NULLABLE="false" COMMENT="Service Operation Name"/>  
         <COLUMN NAME="avg_duration" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="Avg Duration in ms"/>  
         <COLUMN NAME="count_abs" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Count Requests absolute"/>  
         <COLUMN NAME="count_diff" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Count Request since last Measurement"/>  
@@ -33,10 +34,10 @@
     <PARAMETER NAME="SCHEMA_SYSTEM_METRICS" FIELD="SCHEMA_TYPE" REQUIRED="true" NUM_ROW="10" CONTEXT="SYSTEM_METRICS"> 
       <TABLE READONLY="true"> 
         <COLUMN NAME="timestamp" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="32" NULLABLE="false" COMMENT="Timestamp Measurement"/>  
-        <COLUMN NAME="process_cpu_load" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="Process CPU Load"/>  
-        <COLUMN NAME="system_cpu_load" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="System CPU Load"/>  
-        <COLUMN NAME="heap_memory_used" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Used Heap Memory"/>  
-        <COLUMN NAME="heap_memory_max" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Max Heap Memory"/> 
+        <COLUMN NAME="jvm_process_cpu_load" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="Process CPU Load"/>  
+        <COLUMN NAME="jvm_system_cpu_load" TYPE="id_Double" READONLY="true" CUSTOM="true" LENGTH="14" PRECISION="4" NULLABLE="false" COMMENT="System CPU Load"/>  
+        <COLUMN NAME="jvm_heap_memory_used" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Used Heap Memory"/>  
+        <COLUMN NAME="jvm_heap_memory_max" TYPE="id_Long" READONLY="true" CUSTOM="true" LENGTH="22" NULLABLE="false" COMMENT="Max Heap Memory"/> 
       </TABLE> 
     </PARAMETER>  
     <PARAMETER FIELD="CHECK" NAME="IS_KARAF" NUM_ROW="20" REQUIRED="true" GROUP="CONNECTION"> 
@@ -69,16 +70,23 @@
     </PARAMETER>  
     <PARAMETER FIELD="TEXT" NAME="TIME_INTERVAL" NUM_ROW="80"> 
       <DEFAULT>1</DEFAULT> 
+    </PARAMETER>  
+    <PARAMETER FIELD="TEXT" NAME="TIME_INTERVAL_BETWEEN_SERVICE_REFRESH" NUM_ROW="80"> 
+      <DEFAULT>10</DEFAULT> 
     </PARAMETER> 
   </PARAMETERS>  
   <ADVANCED_PARAMETERS> 
-    <PARAMETER NAME="RELEASE_LABEL_20170922" FIELD="LABEL" COLOR="0;0;0" NUM_ROW="900">
-      <DEFAULT>Release: 2.1 build at: 20170922</DEFAULT>
+    <PARAMETER NAME="RELEASE_LABEL_20181005" FIELD="LABEL" COLOR="0;0;0" NUM_ROW="900">
+      <DEFAULT>Release: 3.1 build at: 20181005</DEFAULT>
     </PARAMETER>
   </ADVANCED_PARAMETERS>  
   <CODEGENERATION> 
     <IMPORTS> 
-      <IMPORT NAME="jlo-talendcomp-karaf-jmx" MODULE="jlo-talendcomp-karaf-jmx-2.1.jar" REQUIRED="true"/>
+      <IMPORT NAME="jlo-talendcomp-karaf-jmx" MODULE="jlo-talendcomp-karaf-jmx-3.1.jar" REQUIRED="true"/>
+      <IMPORT NAME="httpclient" MODULE="httpclient-4.3.6.jar" REQUIRED="true"/>
+      <IMPORT NAME="httpcore" MODULE="httpcore-4.3.3.jar" REQUIRED="true"/>
+      <IMPORT NAME="commons-logging" MODULE="commons-logging-1.1.3.jar" REQUIRED="true"/>
+      <IMPORT NAME="commons-codec" MODULE="commons-codec-1.6.jar" REQUIRED="true"/>
     </IMPORTS> 
   </CODEGENERATION>  
   <RETURNS> 

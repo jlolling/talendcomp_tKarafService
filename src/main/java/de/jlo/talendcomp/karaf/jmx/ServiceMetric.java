@@ -3,6 +3,7 @@ package de.jlo.talendcomp.karaf.jmx;
 public class ServiceMetric {
 	
 	private String serviceName = null;
+	private String operation = null;
 	private Double meanDuration = null;
 	private Long count = null;
 	private Long countLast = null;
@@ -59,6 +60,12 @@ public class ServiceMetric {
 		} else {
 			return 0l;
 		}
+	}
+	public String getOperation() {
+		return operation;
+	}
+	public void setOperation(String operation) {
+		this.operation = operation;
 	}
 
 }

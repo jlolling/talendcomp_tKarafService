@@ -24,17 +24,17 @@
 <%	if (connName != null) { %>
 	try {
 		if (<%=connName%>.uninstall) {
-			<%=cid%>.uninstallTalendService(<%=connName%>.artifact_id);
+			<%=cid%>.uninstallTalendService(<%=connName%>.group_id, <%=connName%>.artifact_id);
 			countUninstall_<%=cid%>++;
 		} else {
 			<%=cid%>.installTalendService(<%=connName%>.group_id, <%=connName%>.artifact_id, <%=connName%>.version);
 			countInstall_<%=cid%>++;
 		}
-		<%=connName%>.sucessful = true;
+		<%=connName%>.successful = true;
 	} catch (Exception e) {
 		String message = "Failed to install/uninstall: " + e.getMessage();
 		globalMap.put("<%=cid%>_ERROR_MESSAGE", message);
-		<%=connName%>.sucessful = false;
+		<%=connName%>.successful = false;
 		countFailures_<%=cid%>++;
 <%	if (dieOnError) { %>
 		throw new Exception(message, e);

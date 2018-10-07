@@ -11,9 +11,9 @@
 	" 
 %>
 <% 
-    CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
-    INode node = (INode) codeGenArgument.getArgument();
-    String cid = node.getUniqueName();
+	CodeGeneratorArgument codeGenArgument = (CodeGeneratorArgument) argument;
+	INode node = (INode) codeGenArgument.getArgument();
+	String cid = node.getUniqueName();
 	String serviceMetricsConnName = null;
 	List<? extends IConnection> serviceMetricsConns = node.getOutgoingConnections("SERVICE_METRICS");
 	if (serviceMetricsConns != null && serviceMetricsConns.isEmpty() == false) {
@@ -40,6 +40,7 @@
 	}
 	boolean ignoreSummaryMetrics = "true".equals(ElementParameterParser.getValue(node, "__FEATURE_FILTER_IS_OPERATION__"));
 	String interval = ElementParameterParser.getValue(node, "__TIME_INTERVAL__");
+	String intervalServiceRefresh = ElementParameterParser.getValue(node, "__TIME_INTERVAL_BETWEEN_SERVICE_REFRESH__");
 %>
 	de.jlo.talendcomp.karaf.jmx.KarafClient client_<%=cid%> = new de.jlo.talendcomp.karaf.jmx.KarafClient();
 	client_<%=cid%>.setJmxUser(<%=jmxUser%>);
@@ -61,14 +62,12 @@
 <%	if (interval != null && interval.trim().isEmpty() == false) { %>
 	<%=cid%>.setInterval(<%=interval%>);
 <%	} %>
+<%	if (intervalServiceRefresh != null && intervalServiceRefresh.trim().isEmpty() == false) { %>
+	<%=cid%>.setTimeBetweenServiceRefresh(<%=intervalServiceRefresh%>);
+<%	} %>
     <%=cid%>.setIgnoreSummaryMetrics(<%=ignoreSummaryMetrics%>);
 	java.util.List<de.jlo.talendcomp.karaf.jmx.ServiceMetric> list_<%=cid%> = new java.util.ArrayList<de.jlo.talendcomp.karaf.jmx.ServiceMetric>();
-	try {
-		<%=cid%>.setupCXFTotalsMetricObjectNames(<%=filter%>);
-	} catch (Exception e) {
-		globalMap.put("<%=cid%>_ERROR_MESSAGE", "Setup metric object names failed: " + e.getMessage());
-		throw new Exception("Setup metric object names failed: " + e.getMessage(), e);
-	}
+	<%=cid%>.setArtifactPattern(<%=filter%>);
 	while (<%=cid%>.next()) {
 		de.jlo.talendcomp.karaf.jmx.SystemMetrics <%=cid%>_systemMetrics = null;
 		try {
@@ -91,6 +90,7 @@
 			if (<%=cid%>_no_service == false) {
 				de.jlo.talendcomp.karaf.jmx.ServiceMetric <%=cid%>_metric = list_<%=cid%>.get(<%=cid%>_metric_index);
 				globalMap.put("<%=cid%>_service_endpoint", <%=cid%>_metric.getServiceName());
+				globalMap.put("<%=cid%>_service_operation", <%=cid%>_metric.getOperation());
 				globalMap.put("<%=cid%>_avg_duration", <%=cid%>_metric.getDurationMean());
 				globalMap.put("<%=cid%>_timestamp", <%=cid%>_metric.getTimestamp());
 				globalMap.put("<%=cid%>_count_abs", <%=cid%>_metric.getCount());
@@ -98,6 +98,7 @@
 <%	if (serviceMetricsConnName != null) { %>
 				<%=serviceMetricsConnName%> = new <%=serviceMetricsConnName%>Struct();
 				<%=serviceMetricsConnName%>.service_endpoint = <%=cid%>_metric.getServiceName();
+				<%=serviceMetricsConnName%>.service_operation = <%=cid%>_metric.getOperation();
 				<%=serviceMetricsConnName%>.avg_duration = <%=cid%>_metric.getDurationMean();
 				<%=serviceMetricsConnName%>.timestamp = <%=cid%>_metric.getTimestamp();
 				<%=serviceMetricsConnName%>.count_abs = <%=cid%>_metric.getCount();
@@ -110,12 +111,12 @@
 <%	if (systemMetricsConnName != null) { %>
 			if (count_<%=cid%> == 0) {
 				<%=systemMetricsConnName%> = new <%=systemMetricsConnName%>Struct();
-				<%=systemMetricsConnName%>.process_cpu_load = <%=cid%>_systemMetrics.getProcessCpuLoad();
-				<%=systemMetricsConnName%>.system_cpu_load = <%=cid%>_systemMetrics.getSystemCpuLoad();
-				<%=systemMetricsConnName%>.heap_memory_used = <%=cid%>_systemMetrics.getHeapMemoryUsed();
-				<%=systemMetricsConnName%>.heap_memory_max = <%=cid%>_systemMetrics.getHeapMemoryMax();
+				<%=systemMetricsConnName%>.jvm_process_cpu_load = <%=cid%>_systemMetrics.getProcessCpuLoad();
+				<%=systemMetricsConnName%>.jvm_system_cpu_load = <%=cid%>_systemMetrics.getSystemCpuLoad();
+				<%=systemMetricsConnName%>.jvm_heap_memory_used = <%=cid%>_systemMetrics.getHeapMemoryUsed();
+				<%=systemMetricsConnName%>.jvm_heap_memory_max = <%=cid%>_systemMetrics.getHeapMemoryMax();
 				<%=systemMetricsConnName%>.timestamp = <%=cid%>_systemMetrics.getTimestamp();
 			} else {
 				<%=systemMetricsConnName%> = null;
-			}			
+			}
 <%	} %>

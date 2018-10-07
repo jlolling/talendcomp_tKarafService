@@ -16,10 +16,14 @@ public class CXFMetricsCollector {
 	private static Logger logger = Logger.getLogger(CXFMetricsCollector.class);
 	private BaseClient baseClient = null;
 	private List<ObjectName> listMetricObjectNames = new ArrayList<ObjectName>();
+	private List<ObjectName> listNewMetricObjectNames = new ArrayList<ObjectName>();
 	private long lastExecutionTime = 0l;
 	private long interval = 1000l;
 	private List<ServiceMetric> lastListServiceMetrics = new ArrayList<ServiceMetric>();
 	private boolean ignoreSummaryMetrics = false;
+	private String artifactPattern = null;
+	private long timeBetweenObjectNameRefresh = 10000; // 10s
+	private long lastTimeObjectNameRefreshed = 0;
 	
 	public CXFMetricsCollector(BaseClient baseClient) {
 		if (baseClient == null || baseClient.isConnected() == false) {
@@ -30,7 +34,8 @@ public class CXFMetricsCollector {
 		this.baseClient = baseClient;
 	}
 	
-	public void setupCXFTotalsMetricObjectNames(String artifactPattern) throws Exception {
+	public void setupCXFTotalsMetricObjectNames() throws Exception {
+		listNewMetricObjectNames.clear();
 		logger.debug("Fetching metric object names and filter with: " + artifactPattern);
 		Pattern p = null;
 		if (artifactPattern != null && artifactPattern.trim().isEmpty() == false) {
@@ -45,10 +50,16 @@ public class CXFMetricsCollector {
 					if (p != null) {
 						Matcher matcher = p.matcher(name.getKeyProperty("bus.id"));
 						if (matcher.find()) {
-							listMetricObjectNames.add(oi.getObjectName());
+							if (listMetricObjectNames.contains(oi.getObjectName()) == false) {
+								listMetricObjectNames.add(oi.getObjectName());
+								listNewMetricObjectNames.add(oi.getObjectName());
+							}
 						}
 					} else {
-						listMetricObjectNames.add(oi.getObjectName());
+						if (listMetricObjectNames.contains(oi.getObjectName()) == false) {
+							listMetricObjectNames.add(oi.getObjectName());
+							listNewMetricObjectNames.add(oi.getObjectName());
+						}
 					}
 				}
 			}
@@ -65,6 +76,10 @@ public class CXFMetricsCollector {
 		return listMetricObjectNames;
 	}
 	
+	public List<ObjectName> getListNewMetricObjectNames() {
+		return listNewMetricObjectNames;
+	}
+
 	private String getArtifactIdFromObjectName(ObjectName name) {
 		String artifactId = name.getKeyProperty("bus.id");
 		if (artifactId != null) {
@@ -82,16 +97,15 @@ public class CXFMetricsCollector {
 	
 	public ServiceMetric fetchServiceMetric(ObjectName objectName, String operation) throws Exception {
 		String name = getArtifactIdFromObjectName(objectName);
-		if (operation != null && operation.trim().isEmpty() == false) {
-			name = name + "." + operation;
-		} else {
+		if (operation == null || operation.trim().isEmpty()) {
 			String op = objectName.getKeyProperty("Operation");
 			if (op != null && op.trim().isEmpty() == false) {
-				name = name + "." + op;
+				operation = op;
 			}
 		}
 		ServiceMetric metric = new ServiceMetric();
 		metric.setServiceName(name);
+		metric.setOperation(operation);
 		Double meanDuration = (Double) baseClient.getAttributeValue(objectName, "Mean");
 		metric.setDurationMean(meanDuration);
 		Long count = (Long) baseClient.getAttributeValue(objectName, "Count");
@@ -124,11 +138,15 @@ public class CXFMetricsCollector {
 		return listServiceMetrics;
 	}
 	
-	public boolean next() {
+	public boolean next() throws Exception {
 		if (Thread.currentThread().isInterrupted()) {
 			return false;
 		}
 		long now = System.currentTimeMillis();
+		if (lastTimeObjectNameRefreshed == 0 || (now - lastTimeObjectNameRefreshed) > timeBetweenObjectNameRefresh) {
+			setupCXFTotalsMetricObjectNames();
+			lastTimeObjectNameRefreshed = now;
+		}
 		long diff = interval - (now - lastExecutionTime);
 		if (diff > 0 && lastExecutionTime > 0l) {
 			try {
@@ -155,6 +173,20 @@ public class CXFMetricsCollector {
 
 	public void setIgnoreSummaryMetrics(boolean ignoreSummaryMetrics) {
 		this.ignoreSummaryMetrics = ignoreSummaryMetrics;
+	}
+
+	public String getArtifactPattern() {
+		return artifactPattern;
+	}
+
+	public void setArtifactPattern(String artifactPattern) {
+		this.artifactPattern = artifactPattern;
+	}
+
+	public void setTimeBetweenServiceRefresh(Integer timeBetweenObjectNameRefresh) {
+		if (timeBetweenObjectNameRefresh != null && timeBetweenObjectNameRefresh > 0) {
+			this.timeBetweenObjectNameRefresh = timeBetweenObjectNameRefresh * 1000;
+		}
 	}
 
 }

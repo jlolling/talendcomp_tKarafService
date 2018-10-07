@@ -14,8 +14,6 @@ public class KarafDeployer {
 	
 	private KarafClient jmxClient = null;
 	private static Logger logger = Logger.getLogger(KarafDeployer.class.getName());
-	private HttpClient httpClient = null;
-	private String nexusGetFeatureXmlTemplate = "http://localhost:8081/nexus/content/repositories/{repository}/{groupId}/{artifactId}-feature/{version}/{artifactId}-feature-{version}.xml";
 	
 	public KarafDeployer(KarafClient jmxClient) {
 		if (jmxClient == null) {
@@ -45,31 +43,12 @@ public class KarafDeployer {
 		return list;
 	}
 	
-	private HttpClient getHttpClient() throws Exception {
-		if (httpClient == null) {
-			httpClient = HttpClient.init(null, null, null);
-		}
-		return httpClient;
-	}
-	
-	public boolean checkArtifactInNexus(String groupId, String artifactId, String version) throws Exception {
-		if (nexusGetFeatureXmlTemplate == null) {
-			throw new IllegalStateException("Nexus feature get template url not set!");
-		}
-		String groupStr = groupId.replace('.', '/');
-		String url = nexusGetFeatureXmlTemplate.replace("{artifactId}", artifactId).replace("{version}", version).replace("{groupId}", groupStr);
-		HttpClient getter = getHttpClient();
-		getter.get(url);
-		if (getter.getStatusCode() == 200) {
-			return true;
-		}
-		return false;
-	}
-	
 	public void installTalendService(String groupId, String artifactId, String version) throws Exception {
 		logger.info("Install Talend Service: groupId=" + groupId + ", artifactId=" + artifactId + ", version=" + version);
-		logger.info("Add the repo...");
 		String featureName = artifactId + "-feature";
+		logger.info("Remove repo...");
+		removeFeatureRepo(groupId, featureName);
+		logger.info("Add the repo...");
 		addFeatureRepo(groupId, featureName, version);
 		logger.info("Uninstall previous features...");
 		uninstallFeature(featureName);
@@ -83,11 +62,13 @@ public class KarafDeployer {
 		}
 	}
 	
-	public void uninstallTalendService(String artifactId) throws Exception {
+	public void uninstallTalendService(String groupId, String artifactId) throws Exception {
 		logger.info("Uninstall Talend Service: artifactId=" + artifactId);
 		String featureName = artifactId + "-feature";
 		logger.info("Uninstall features...");
 		uninstallFeature(featureName);
+		logger.info("Remove repo...");
+		removeFeatureRepo(groupId, featureName);
 		logger.info("Done");
 		logger.info("Check feature list...");
 		List<ServiceFeature> list = fetchFeatures(featureName, true);
@@ -108,9 +89,25 @@ public class KarafDeployer {
 		jmxClient.getmBeanServerConnection().invoke(new ObjectName("org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName()), "installFeature", opParams, opSig);
 	}
 	
-	public void addFeatureRepo(String groupId, String featureName, String version) throws Exception {
+	public void removeFeatureRepo(String groupId, String featureName) {
+		String fullQualifiedFeature = "mvn:" + groupId + "/" + featureName;
 		String[] opParams = {
-				"mvn:" + groupId + "/" + featureName + "/" + version + "/xml"
+				fullQualifiedFeature
+		};
+		String[] opSig = {
+				String.class.getName()
+        };
+		try {
+			jmxClient.getmBeanServerConnection().invoke(new ObjectName("org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName()), "removeRepository", opParams, opSig);
+		} catch (Exception e) {
+			// ignore
+		}
+	}
+
+	public void addFeatureRepo(String groupId, String featureName, String version) throws Exception {
+		String fullQualifiedFeatureWithVersion = "mvn:" + groupId + "/" + featureName + "/" + version + "/xml";
+		String[] opParams = {
+				fullQualifiedFeatureWithVersion
 		};
 		String[] opSig = {
 				String.class.getName()
@@ -149,14 +146,6 @@ public class KarafDeployer {
 			sb.append(array[i]);
 		}
 		return sb.toString();
-	}
-
-	public String getNexusGetFeatureXmlTemplate() {
-		return nexusGetFeatureXmlTemplate;
-	}
-
-	public void setNexusGetFeatureXmlTemplate(String nexusGetFeatureXmlTemplate) {
-		this.nexusGetFeatureXmlTemplate = nexusGetFeatureXmlTemplate;
 	}
 
 }

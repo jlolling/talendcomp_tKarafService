@@ -84,7 +84,8 @@ public class TestCollectMetrics {
 		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
 		c.connect();
 		CXFMetricsCollector coll = new CXFMetricsCollector(c);
-		coll.setupCXFTotalsMetricObjectNames("core_api|beat17");
+		coll.setArtifactPattern("core_api|beat17");
+		coll.setupCXFTotalsMetricObjectNames();
 		assertTrue(true);
 	}
 
@@ -103,7 +104,8 @@ public class TestCollectMetrics {
 		c.connect();
 		CXFMetricsCollector coll = new CXFMetricsCollector(c);
 		coll.setInterval(5);
-		coll.setupCXFTotalsMetricObjectNames("core_api|beat17");
+		coll.setArtifactPattern("core_api|beat17");
+		coll.setupCXFTotalsMetricObjectNames();
 		System.out.println("\n\n#########################");
 		int count = 0;
 		while (coll.next()) {

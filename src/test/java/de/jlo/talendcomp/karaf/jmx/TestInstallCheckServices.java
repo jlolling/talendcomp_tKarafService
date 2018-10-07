@@ -106,8 +106,8 @@ public class TestInstallCheckServices {
 		assertTrue(true);
 		// check memory usage
 		KarafDeployer d = new KarafDeployer(c);
-		d.uninstallTalendService("navi_service_uploaded_files");
-		d.installTalendService("de.gvl","navi_service_uploaded_files", "26.17.0");
+		d.uninstallTalendService("de.gvl", "navi_service_uploaded_files");
+		d.installTalendService("de.gvl", "navi_service_uploaded_files", "26.17.0");
 	}
 
 	@Test
@@ -124,7 +124,8 @@ public class TestInstallCheckServices {
 		c.setKarafRemoteJmxUrl(host, jmxPort, karafInstance, jstatdPort);
 		c.connect();
 		CXFMetricsCollector coll = new CXFMetricsCollector(c);
-		coll.setupCXFTotalsMetricObjectNames("core_api|beat17");
+		coll.setArtifactPattern("core_api|beat17");
+		coll.setupCXFTotalsMetricObjectNames();
 		assertTrue(true);
 	}
 
