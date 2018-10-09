@@ -53,7 +53,11 @@ public class ServiceMetric {
 	public Long getCountDiff() {
 		if (count != null) {
 			if (countLast != null) {
-				return count - countLast;
+				long diff = count - countLast;
+				if (diff >= 0) {
+					return diff;
+				}
+				return 0l;
 			} else {
 				return 0l;
 			}
