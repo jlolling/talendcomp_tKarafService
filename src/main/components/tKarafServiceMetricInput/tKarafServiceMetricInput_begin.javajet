@@ -42,23 +42,33 @@
 	String interval = ElementParameterParser.getValue(node, "__TIME_INTERVAL__");
 	String intervalServiceRefresh = ElementParameterParser.getValue(node, "__TIME_INTERVAL_BETWEEN_SERVICE_REFRESH__");
 %>
-	de.jlo.talendcomp.karaf.jmx.KarafClient client_<%=cid%> = new de.jlo.talendcomp.karaf.jmx.KarafClient();
-	client_<%=cid%>.setJmxUser(<%=jmxUser%>);
-	client_<%=cid%>.setJmxPassword(<%=jmxPassword%>);
+	de.jlo.talendcomp.karaf.jmx.KarafClient client_<%=cid%> = (de.jlo.talendcomp.karaf.jmx.KarafClient) globalMap.get("client_<%=cid%>");
+	if (client_<%=cid%> == null) {
+		client_<%=cid%> = new de.jlo.talendcomp.karaf.jmx.KarafClient();
+		client_<%=cid%>.setJmxUser(<%=jmxUser%>);
+		client_<%=cid%>.setJmxPassword(<%=jmxPassword%>);
 <%	if (isKaraf) { %>
-	client_<%=cid%>.setKarafRemoteJmxUrl(<%=server%>, <%=jmxPort%>, <%=instance%>, <%=jstatdPort%>);
+		client_<%=cid%>.setKarafRemoteJmxUrl(<%=server%>, <%=jmxPort%>, <%=instance%>, <%=jstatdPort%>);
 <%	} else { %>
-	client_<%=cid%>.setJmxUrl(<%=jmxUrl%>);
+		client_<%=cid%>.setJmxUrl(<%=jmxUrl%>);
 <%	} %>
-	try {
-		client_<%=cid%>.connect();
-	} catch (Exception e) {
-		globalMap.put("<%=cid%>_ERROR_MESSAGE", "Connect to jmx failed: " + e.getMessage());
-		throw new Exception("Connect to jmx failed: URL: " + client_<%=cid%>.getJmxServiceUrl(), e);
+		try {
+			client_<%=cid%>.connect();
+		} catch (Exception e) {
+			globalMap.put("<%=cid%>_ERROR_MESSAGE", "Connect to jmx failed: " + e.getMessage());
+			throw new Exception("Connect to jmx failed: URL: " + client_<%=cid%>.getJmxServiceUrl(), e);
+		}
+		globalMap.put("client_<%=cid%>", client_<%=cid%>);
 	}
-	globalMap.put("client_<%=cid%>", client_<%=cid%>);
-	de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector <%=cid%> = new de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector(client_<%=cid%>);
-	de.jlo.talendcomp.karaf.jmx.JVMMetricsCollector <%=cid%>_jvm = new de.jlo.talendcomp.karaf.jmx.JVMMetricsCollector(client_<%=cid%>);
+	de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector <%=cid%> = (de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector) globalMap.get("<%=cid%>");
+	if (<%=cid%> == null) {
+		<%=cid%> = new de.jlo.talendcomp.karaf.jmx.CXFMetricsCollector(client_<%=cid%>);
+		globalMap.put("client_<%=cid%>", client_<%=cid%>);
+	}
+	de.jlo.talendcomp.karaf.jmx.JVMMetricsCollector <%=cid%>_jvm = (de.jlo.talendcomp.karaf.jmx.JVMMetricsCollector) globalMap.get("<%=cid%>_jvm");
+	if (<%=cid%>_jvm == null) {
+		<%=cid%>_jvm = new de.jlo.talendcomp.karaf.jmx.JVMMetricsCollector(client_<%=cid%>);
+	}
 <%	if (interval != null && interval.trim().isEmpty() == false) { %>
 	<%=cid%>.setInterval(<%=interval%>);
 <%	} %>

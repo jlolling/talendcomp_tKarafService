@@ -155,8 +155,13 @@ public class CXFMetricsCollector {
 				return false;
 			}
 		}
+		boolean run = false;
+		if (interval > 0 || lastExecutionTime == 0l) {
+			run = true;
+		}
 		lastExecutionTime = System.currentTimeMillis();
-		return true;
+		// if the interval == 0 we want only one run
+		return run;
 	}
 
 	public long getInterval() {
