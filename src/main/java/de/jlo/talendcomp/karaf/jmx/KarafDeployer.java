@@ -27,18 +27,23 @@ public class KarafDeployer {
 	}
 	
 	public List<ServiceFeature> fetchFeatures(String filter, boolean onlyInstalled) throws Exception {
-		Pattern pattern = Pattern.compile(filter);
 		List<ServiceFeature> list = new ArrayList<ServiceFeature>();
-		Collection<CompositeData> result = jmxClient.getAttributeValues("org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName(), "Features");
-		for (CompositeData cd : result) {
-			String name = (String) cd.get("Name");
-			Matcher matcher = pattern.matcher(name);
-			if (matcher.find()) {
-				ServiceFeature f = ServiceFeature.from(cd);
-				if (onlyInstalled == false || f.isInstalled()) {
-					list.add(ServiceFeature.from(cd));
+		String objectName = "org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName();
+		Collection<CompositeData> result = jmxClient.getAttributeValues(objectName, "Features");
+		if (result != null) {
+			Pattern pattern = Pattern.compile(filter);
+			for (CompositeData cd : result) {
+				String name = (String) cd.get("Name");
+				Matcher matcher = pattern.matcher(name);
+				if (matcher.find()) {
+					ServiceFeature f = ServiceFeature.from(cd);
+					if (onlyInstalled == false || f.isInstalled()) {
+						list.add(ServiceFeature.from(cd));
+					}
 				}
 			}
+		} else {
+			throw new Exception("In object: " + objectName + " the attribute Features is null!");
 		}
 		return list;
 	}
