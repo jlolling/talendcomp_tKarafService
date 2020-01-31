@@ -43,7 +43,7 @@ public class KarafDeployer {
 				}
 			}
 		} else {
-			throw new Exception("In object: " + objectName + " the attribute Features is null!");
+			throw new Exception("fetchFeatures with filter: " + filter + " failed: In object: " + objectName + " the attribute Features is null!");
 		}
 		return list;
 	}
@@ -134,7 +134,7 @@ public class KarafDeployer {
 			if (message.contains("not installed")) {
 				// ignore message
 			} else {
-				throw rme;
+				throw new Exception("uninstallFeature: " + featureName + "  failed: " + rme.getMessage(), rme);
 			}
 		}
 	}
