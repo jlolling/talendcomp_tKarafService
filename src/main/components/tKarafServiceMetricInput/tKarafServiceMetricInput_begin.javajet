@@ -50,7 +50,7 @@
 <%	if (isKaraf) { %>
 		client_<%=cid%>.setKarafRemoteJmxUrl(<%=server%>, <%=jmxPort%>, <%=instance%>, <%=jstatdPort%>);
 <%	} else { %>
-		client_<%=cid%>.setJmxUrl(<%=jmxUrl%>);
+		client_<%=cid%>.setJmxServiceUrl(<%=jmxUrl%>);
 <%	} %>
 		try {
 			client_<%=cid%>.connect();
