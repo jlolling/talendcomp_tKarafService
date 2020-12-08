@@ -65,6 +65,7 @@ public class KarafDeployer {
 		if (list.isEmpty()) {
 			throw new Exception("Installation seems to be ok but we cannot find the feature in the list of the installed features!");
 		}
+		logger.info(list.size() + " feature now in total installed on the server.");
 	}
 	
 	public void uninstallTalendService(String groupId, String artifactId) throws Exception {
