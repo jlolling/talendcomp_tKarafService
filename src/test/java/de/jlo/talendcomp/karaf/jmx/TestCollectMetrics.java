@@ -11,21 +11,10 @@ import java.util.Set;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.junit.Before;
 import org.junit.Test;
 
 public class TestCollectMetrics {
 	
-	@Before
-	public void setup() {
-		BasicConfigurator.configure();
-		Logger root = Logger.getRootLogger();
-		root.setLevel(Level.DEBUG);
-	}
-
 	@Test
 	public void testConnect() throws Exception {
 		String host = "talendjobtest01.gvl.local";

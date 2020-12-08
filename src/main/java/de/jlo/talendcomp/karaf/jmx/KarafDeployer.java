@@ -117,7 +117,13 @@ public class KarafDeployer {
 		String[] opSig = {
 				String.class.getName()
         };
-		jmxClient.getmBeanServerConnection().invoke(new ObjectName("org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName()), "addRepository", opParams, opSig);
+		try {
+			jmxClient.getmBeanServerConnection().invoke(new ObjectName("org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName()), "addRepository", opParams, opSig);
+		} catch (Exception e) {
+			if (e.getMessage().contains("ArtifactResolutionException")) {
+				throw new Exception("Adding feature-repository failed: Container cannot resolve feature with groupId: " + groupId + " artifactId: " + featureName + " version: " + version + ". Please check the container logs!");
+			}
+		}
 	}
 
 	public void uninstallFeature(String featureName) throws Exception {

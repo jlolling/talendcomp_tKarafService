@@ -9,11 +9,12 @@ import java.util.regex.Pattern;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CXFMetricsCollector {
 	
-	private static Logger logger = Logger.getLogger(CXFMetricsCollector.class);
+	private static Logger logger = LoggerFactory.getLogger(CXFMetricsCollector.class);
 	private BaseClient baseClient = null;
 	private List<ObjectName> listMetricObjectNames = new ArrayList<ObjectName>();
 	private List<ObjectName> listNewMetricObjectNames = new ArrayList<ObjectName>();
@@ -67,7 +68,7 @@ public class CXFMetricsCollector {
 		if (logger.isDebugEnabled()) {
 			logger.debug(listMetricObjectNames.size() + " metric object names fetched.");
 			for (ObjectName name : listMetricObjectNames) {
-				logger.debug(name);
+				logger.debug(name.getCanonicalName());
 			}
 		}
 	}

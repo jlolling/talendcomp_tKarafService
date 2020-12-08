@@ -5,24 +5,20 @@ import static org.junit.Assert.assertTrue;
 import java.lang.management.MemoryUsage;
 import java.util.List;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
 public class TestInstallCheckServices {
 	
 	@Before
-	public void setup() {
-		BasicConfigurator.configure();
-		Logger root = Logger.getRootLogger();
-		root.setLevel(Level.INFO);
+	public void printout() {
+		System.out.println("java.version=" + System.getProperty("java.version"));
 	}
-
+	
 	@Test
 	public void testConnect() throws Exception {
-		String host = "talendjobtest01.gvl.local";
+		//String host = "talendjobtest01.gvl.local";
+		String host = "localhost";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
 		String karafInstance = "trun";
@@ -41,7 +37,8 @@ public class TestInstallCheckServices {
 
 	@Test
 	public void testListFeatures() throws Exception {
-		String host = "talendjobtest01.gvl.local";
+		//String host = "talendjobtest01.gvl.local";
+		String host = "localhost";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
 		String karafInstance = "trun";
@@ -55,15 +52,17 @@ public class TestInstallCheckServices {
 		assertTrue(true);
 		// check memory usage
 		KarafDeployer d = new KarafDeployer(c);
-		List<ServiceFeature> list = d.fetchFeatures("_service_", true);
+		String featureFilter = ""; // "_service_";
+		List<ServiceFeature> list = d.fetchFeatures(featureFilter, true);
 		for (ServiceFeature f : list) {
-			System.out.println(f.getArtifactId() + " - " + f.getVersion() + "\n");
+			System.out.println(f.getArtifactId() + " - " + f.getVersion());
 		}
 	}
 
 	@Test
 	public void testUnAndInstallFeature() throws Exception {
-		String host = "talendjobtest01.gvl.local";
+		//String host = "talendjobtest01.gvl.local";
+		String host = "localhost";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
 		String karafInstance = "trun";
@@ -76,13 +75,16 @@ public class TestInstallCheckServices {
 		c.connect();
 		assertTrue(true);
 		// check memory usage
+		String artifactId = "service_ping";
+		String version = "0.4.0";
+		String groupId = "de.gvl";
 		KarafDeployer d = new KarafDeployer(c);
 		System.out.println("Uninstall feature...");
-		d.uninstallFeature("navi_service_uploaded_files-feature");
+		d.uninstallFeature(artifactId + "-feature");
 		System.out.println("Add repo...");
-		d.addFeatureRepo("de.gvl","navi_service_uploaded_files-feature", "26.17.0");
+		d.addFeatureRepo(groupId, artifactId + "-feature", version);
 		System.out.println("Install feature...");
-		d.installFeature("navi_service_uploaded_files-feature", "26.17.0");
+		d.installFeature(artifactId + "-feature", version);
 		System.out.println("List resulting features...");
 		List<ServiceFeature> list = d.fetchFeatures("_service_", true);
 		for (ServiceFeature f : list) {
