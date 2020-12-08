@@ -17,7 +17,7 @@ public class TestCollectMetrics {
 	
 	@Test
 	public void testConnect() throws Exception {
-		String host = "talendjobtest01.gvl.local";
+		String host = "dwhtalendjobtest02.gvl.local";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
 		String karafInstance = "trun";
@@ -36,7 +36,7 @@ public class TestCollectMetrics {
 
 	@Test
 	public void testQueryObjectNames() throws Exception {
-		String host = "talendjobtest01.gvl.local";
+		String host = "dwhtalendjobtest02.gvl.local";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
 		String karafInstance = "trun";
@@ -61,7 +61,7 @@ public class TestCollectMetrics {
 	
 	@Test
 	public void testSetupCXFMetricObjectNames() throws Exception {
-		String host = "talendjobtest01.gvl.local";
+		String host = "dwhtalendjobtest02.gvl.local";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
 		String karafInstance = "trun";
@@ -80,7 +80,7 @@ public class TestCollectMetrics {
 
 	@Test
 	public void testListServiceMetrics() throws Exception {
-		String host = "talendjobtest01.gvl.local";
+		String host = "dwhtalendjobtest02.gvl.local";
 		int jmxPort = 44444;
 		int jstatdPort = 1099;
 		String karafInstance = "trun";

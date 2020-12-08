@@ -92,7 +92,11 @@ public class KarafDeployer {
 				String.class.getName(),
                 String.class.getName()
         };
-		jmxClient.getmBeanServerConnection().invoke(new ObjectName("org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName()), "installFeature", opParams, opSig);
+		try {
+			jmxClient.getmBeanServerConnection().invoke(new ObjectName("org.apache.karaf:type=feature,name=" + jmxClient.getKarafInstanceName()), "installFeature", opParams, opSig);
+		} catch (Exception e) {
+			throw new Exception("Install feature: " + featureName + "  version: " + version + " failed. Check server logs.", e);
+		}
 	}
 	
 	public void removeFeatureRepo(String groupId, String featureName) {
