@@ -4,12 +4,12 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class JVMMetricsCollector {
 	
-	private static Logger logger = LoggerFactory.getLogger(JVMMetricsCollector.class);
+	private static Logger logger = LogManager.getLogger(JVMMetricsCollector.class);
 	private BaseClient baseClient = null;
 	private ObjectName onMemory = null;
 	private ObjectName onOperatingSystem = null;

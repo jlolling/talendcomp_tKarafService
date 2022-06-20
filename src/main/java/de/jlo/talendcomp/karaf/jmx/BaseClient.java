@@ -20,8 +20,8 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * JMX client
@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BaseClient {
 
-	private static Logger logger = LoggerFactory.getLogger(BaseClient.class);
+	private static Logger logger = LogManager.getLogger(BaseClient.class);
 	private String jmxServiceUrl = null;
 	private String jmxUser = null;
 	private String jmxPassword = null;

@@ -9,12 +9,12 @@ import java.util.regex.Pattern;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CXFMetricsCollector {
 	
-	private static Logger logger = LoggerFactory.getLogger(CXFMetricsCollector.class);
+	private static Logger logger = LogManager.getLogger(CXFMetricsCollector.class);
 	private BaseClient baseClient = null;
 	private List<ObjectName> listMetricObjectNames = new ArrayList<ObjectName>();
 	private List<ObjectName> listNewMetricObjectNames = new ArrayList<ObjectName>();
