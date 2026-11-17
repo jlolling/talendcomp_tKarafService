@@ -6,7 +6,7 @@ There are 2 components:
 tKarafServiceInstall
 * install a service (the complete feature) and take care to have only one bundle version active
 
-tKarafServiceInput
+tKarafServiceList
 * Read the artifacts from a Karaf container
 
 
