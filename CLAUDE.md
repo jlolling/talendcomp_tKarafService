@@ -13,6 +13,9 @@ mvn test -Dtest=SomeTest#someMethod   # single test class or method
 ```
 
 Java 8; `cimt-talendcomp-maven-plugin` 2.1. `custom_component_folder` is defined in `~/.m2/settings.xml`.
+All tests (`TestCollectMetrics`, `TestInstallCheckServices`) connect via JMX/RMI to real Karaf servers (`*.gvl.local`, `localhost:1099`) and fail elsewhere. Use `-DskipTests` when they are unavailable.
+
+`log4j-api` is `provided`: the Talend job runtime supplies log4j2, so it is not bundled into the components.
 
 ## Structure
 
